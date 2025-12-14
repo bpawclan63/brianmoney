@@ -14,9 +14,9 @@ import {
   Cell,
   Legend,
 } from 'recharts';
-import { useTransactions, useBudgets, useCategories, useSettings } from '@/hooks/useStore';
+import { useDbTransactions, useDbBudgets, useDbCategories, useDbProfile } from '@/hooks/useSupabaseStore';
 import { formatCurrency } from '@/lib/data';
-import { TrendingUp, TrendingDown, Target, AlertTriangle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, AlertTriangle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const COLORS = [
@@ -29,10 +29,13 @@ const COLORS = [
 ];
 
 export default function Analytics() {
-  const { transactions } = useTransactions();
-  const { budgets } = useBudgets();
-  const { categories } = useCategories();
-  const { currency } = useSettings();
+  const { transactions, loading: loadingTx } = useDbTransactions();
+  const { budgets, loading: loadingBudgets } = useDbBudgets();
+  const { categories, loading: loadingCat } = useDbCategories();
+  const { profile } = useDbProfile();
+
+  const currency = profile?.currency || 'IDR';
+  const loading = loadingTx || loadingBudgets || loadingCat;
 
   const currentMonth = new Date().toISOString().substring(0, 7);
 
@@ -46,9 +49,9 @@ export default function Analytics() {
         months[month] = { income: 0, expense: 0, savings: 0 };
       }
       if (t.type === 'income') {
-        months[month].income += t.amount;
+        months[month].income += Number(t.amount);
       } else {
-        months[month].expense += t.amount;
+        months[month].expense += Number(t.amount);
       }
     });
 
@@ -72,14 +75,14 @@ export default function Analytics() {
     const currentBudgets = budgets.filter((b) => b.month === currentMonth);
 
     return currentBudgets.map((budget) => {
-      const category = categories.find((c) => c.id === budget.categoryId);
+      const category = categories.find((c) => c.id === budget.category_id);
       const actual = monthlyExpenses
-        .filter((t) => t.categoryId === budget.categoryId)
-        .reduce((sum, t) => sum + t.amount, 0);
+        .filter((t) => t.category_id === budget.category_id)
+        .reduce((sum, t) => sum + Number(t.amount), 0);
 
       return {
         name: category?.name || 'Unknown',
-        budget: budget.amount,
+        budget: Number(budget.amount),
         actual,
         icon: category?.icon || '📊',
       };
@@ -94,7 +97,8 @@ export default function Analytics() {
 
     const categoryTotals: Record<string, number> = {};
     monthlyExpenses.forEach((t) => {
-      categoryTotals[t.categoryId] = (categoryTotals[t.categoryId] || 0) + t.amount;
+      const catId = t.category_id || 'other';
+      categoryTotals[catId] = (categoryTotals[catId] || 0) + Number(t.amount);
     });
 
     return Object.entries(categoryTotals)
@@ -113,11 +117,11 @@ export default function Analytics() {
   const insights = useMemo(() => {
     const monthlyIncome = transactions
       .filter((t) => t.type === 'income' && t.date.startsWith(currentMonth))
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const monthlyExpense = transactions
       .filter((t) => t.type === 'expense' && t.date.startsWith(currentMonth))
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const savingsRate = monthlyIncome > 0 ? ((monthlyIncome - monthlyExpense) / monthlyIncome) * 100 : 0;
 
@@ -147,6 +151,14 @@ export default function Analytics() {
     }
     return null;
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

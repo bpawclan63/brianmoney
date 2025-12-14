@@ -1,32 +1,66 @@
 import { useState, useMemo } from 'react';
-import { Plus, TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, ArrowLeftRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TransactionList } from '@/components/transactions/TransactionList';
 import { AddTransactionDialog } from '@/components/transactions/AddTransactionDialog';
-import { useTransactions, useCategories, useSettings, useBudgets } from '@/hooks/useStore';
+import { useDbTransactions, useDbCategories, useDbProfile } from '@/hooks/useSupabaseStore';
 import { formatCurrency } from '@/lib/data';
 import { StatCard } from '@/components/dashboard/StatCard';
 
 export default function Transactions() {
-  const { transactions, addTransaction, deleteTransaction } = useTransactions();
-  const { budgets, updateBudget } = useBudgets();
-  const { categories } = useCategories();
-  const { currency } = useSettings();
+  const { transactions, loading: loadingTx, addTransaction, deleteTransaction } = useDbTransactions();
+  const { categories, loading: loadingCat } = useDbCategories();
+  const { profile } = useDbProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleAddTransaction = (data: Parameters<typeof addTransaction>[0]) => {
-    addTransaction(data);
-    
-    // Update budget spent if expense
-    if (data.type === 'expense') {
-      const currentMonth = new Date().toISOString().substring(0, 7);
-      const budget = budgets.find(
-        (b) => b.categoryId === data.categoryId && b.month === currentMonth
-      );
-      if (budget) {
-        updateBudget(budget.id, { spent: budget.spent + data.amount });
-      }
-    }
+  const currency = profile?.currency || 'IDR';
+  const loading = loadingTx || loadingCat;
+
+  // Transform categories for the dialog
+  const transformedCategories = useMemo(() => {
+    return categories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      icon: c.icon,
+      color: c.color,
+      type: c.type as 'income' | 'expense' | 'both',
+    }));
+  }, [categories]);
+
+  // Transform transactions for the list
+  const transformedTransactions = useMemo(() => {
+    return transactions.map((t) => ({
+      id: t.id,
+      date: t.date,
+      type: t.type,
+      categoryId: t.category_id || '',
+      amount: t.amount,
+      note: t.note || '',
+      paymentMethod: t.payment_method,
+      tags: t.tags || [],
+      createdAt: t.created_at,
+    }));
+  }, [transactions]);
+
+  const handleAddTransaction = async (data: {
+    type: 'income' | 'expense';
+    categoryId: string;
+    amount: number;
+    note: string;
+    date: string;
+    paymentMethod: 'cash' | 'bank' | 'e-wallet';
+  }) => {
+    await addTransaction({
+      type: data.type,
+      category_id: data.categoryId || null,
+      amount: data.amount,
+      note: data.note || null,
+      date: data.date,
+      payment_method: data.paymentMethod,
+      tags: null,
+      recurring_id: null,
+    });
+    setIsDialogOpen(false);
   };
 
   const summary = useMemo(() => {
@@ -35,10 +69,18 @@ export default function Transactions() {
 
     return {
       total: monthlyTransactions.length,
-      income: monthlyTransactions.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0),
-      expense: monthlyTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0),
+      income: monthlyTransactions.filter((t) => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0),
+      expense: monthlyTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0),
     };
   }, [transactions]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -81,8 +123,8 @@ export default function Transactions() {
 
       {/* Transaction List */}
       <TransactionList
-        transactions={transactions}
-        categories={categories}
+        transactions={transformedTransactions}
+        categories={transformedCategories}
         currency={currency}
         onDelete={deleteTransaction}
       />
@@ -92,7 +134,7 @@ export default function Transactions() {
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onAdd={handleAddTransaction}
-        categories={categories}
+        categories={transformedCategories}
       />
     </div>
   );

@@ -1,26 +1,40 @@
 import { useState, useMemo } from 'react';
-import { Plus, PiggyBank, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Plus, PiggyBank, AlertTriangle, CheckCircle, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BudgetCard } from '@/components/budgets/BudgetCard';
-import { useBudgets, useCategories, useSettings, useTransactions } from '@/hooks/useStore';
+import { useDbBudgets, useDbCategories, useDbProfile, useDbTransactions } from '@/hooks/useSupabaseStore';
 import { formatCurrency } from '@/lib/data';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { X } from 'lucide-react';
 
 export default function Budgets() {
-  const { budgets, addBudget, updateBudget } = useBudgets();
-  const { transactions } = useTransactions();
-  const { categories } = useCategories();
-  const { currency } = useSettings();
+  const { budgets, loading: loadingBudgets, addBudget } = useDbBudgets();
+  const { transactions, loading: loadingTx } = useDbTransactions();
+  const { categories, loading: loadingCat } = useDbCategories();
+  const { profile } = useDbProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [budgetAmount, setBudgetAmount] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const currency = profile?.currency || 'IDR';
+  const loading = loadingBudgets || loadingTx || loadingCat;
 
   const currentMonth = new Date().toISOString().substring(0, 7);
   const currentMonthBudgets = budgets.filter((b) => b.month === currentMonth);
+
+  // Transform categories
+  const transformedCategories = useMemo(() => {
+    return categories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      icon: c.icon,
+      color: c.color,
+      type: c.type as 'income' | 'expense' | 'both',
+    }));
+  }, [categories]);
 
   // Recalculate spent amounts based on actual transactions
   const budgetsWithActualSpent = useMemo(() => {
@@ -30,9 +44,15 @@ export default function Budgets() {
 
     return currentMonthBudgets.map((budget) => {
       const spent = monthlyExpenses
-        .filter((t) => t.categoryId === budget.categoryId)
-        .reduce((sum, t) => sum + t.amount, 0);
-      return { ...budget, spent };
+        .filter((t) => t.category_id === budget.category_id)
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+      return { 
+        id: budget.id,
+        categoryId: budget.category_id,
+        amount: Number(budget.amount),
+        month: budget.month,
+        spent 
+      };
     });
   }, [currentMonthBudgets, transactions, currentMonth]);
 
@@ -45,25 +65,34 @@ export default function Budgets() {
     return { totalBudget, totalSpent, onTrack, overBudget };
   }, [budgetsWithActualSpent]);
 
-  const expenseCategories = categories.filter((c) => c.type === 'expense' || c.type === 'both');
-  const usedCategoryIds = currentMonthBudgets.map((b) => b.categoryId);
+  const expenseCategories = transformedCategories.filter((c) => c.type === 'expense' || c.type === 'both');
+  const usedCategoryIds = currentMonthBudgets.map((b) => b.category_id);
   const availableCategories = expenseCategories.filter((c) => !usedCategoryIds.includes(c.id));
 
-  const handleAddBudget = (e: React.FormEvent) => {
+  const handleAddBudget = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCategory || !budgetAmount || parseFloat(budgetAmount) <= 0) return;
 
-    addBudget({
-      categoryId: selectedCategory,
+    setSubmitting(true);
+    await addBudget({
+      category_id: selectedCategory,
       amount: parseFloat(budgetAmount),
       month: currentMonth,
-      spent: 0,
     });
 
     setSelectedCategory('');
     setBudgetAmount('');
     setIsDialogOpen(false);
+    setSubmitting(false);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -139,7 +168,7 @@ export default function Budgets() {
             <BudgetCard
               key={budget.id}
               budget={budget}
-              category={categories.find((c) => c.id === budget.categoryId)}
+              category={transformedCategories.find((c) => c.id === budget.categoryId)}
               currency={currency}
             />
           ))}
@@ -198,7 +227,8 @@ export default function Budgets() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" variant="neon">
+              <Button type="submit" className="w-full" variant="neon" disabled={submitting}>
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 <Plus className="w-4 h-4" />
                 Add Budget
               </Button>

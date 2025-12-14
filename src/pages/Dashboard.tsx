@@ -1,19 +1,62 @@
 import { useMemo } from 'react';
-import { Wallet, TrendingUp, TrendingDown, PiggyBank } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, PiggyBank, Loader2 } from 'lucide-react';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { QuickTodoWidget } from '@/components/dashboard/QuickTodoWidget';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { SpendingChart } from '@/components/dashboard/SpendingChart';
 import { CategoryChart } from '@/components/dashboard/CategoryChart';
-import { useTransactions, useBudgets, useTodos, useCategories, useSettings } from '@/hooks/useStore';
+import { useDbTransactions, useDbBudgets, useDbTodos, useDbCategories, useDbProfile } from '@/hooks/useSupabaseStore';
 import { formatCurrency } from '@/lib/data';
 
 export default function Dashboard() {
-  const { transactions } = useTransactions();
-  const { budgets } = useBudgets();
-  const { todos, toggleTodo } = useTodos();
-  const { categories } = useCategories();
-  const { currency, initialBalance } = useSettings();
+  const { transactions, loading: loadingTransactions } = useDbTransactions();
+  const { budgets, loading: loadingBudgets } = useDbBudgets();
+  const { todos, toggleTodo, loading: loadingTodos } = useDbTodos();
+  const { categories, loading: loadingCategories } = useDbCategories();
+  const { profile, loading: loadingProfile } = useDbProfile();
+
+  const currency = profile?.currency || 'IDR';
+  const initialBalance = profile?.initial_balance || 0;
+
+  const loading = loadingTransactions || loadingBudgets || loadingTodos || loadingCategories || loadingProfile;
+
+  // Transform db data to match component expectations
+  const transformedTransactions = useMemo(() => {
+    return transactions.map((t) => ({
+      id: t.id,
+      date: t.date,
+      type: t.type,
+      categoryId: t.category_id || '',
+      amount: t.amount,
+      note: t.note || '',
+      paymentMethod: t.payment_method,
+      tags: t.tags || [],
+      createdAt: t.created_at,
+    }));
+  }, [transactions]);
+
+  const transformedCategories = useMemo(() => {
+    return categories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      icon: c.icon,
+      color: c.color,
+      type: c.type as 'income' | 'expense' | 'both',
+    }));
+  }, [categories]);
+
+  const transformedTodos = useMemo(() => {
+    return todos.map((t) => ({
+      id: t.id,
+      title: t.title,
+      description: t.description || undefined,
+      dueDate: t.due_date || undefined,
+      priority: t.priority,
+      status: t.status,
+      createdAt: t.created_at,
+      completedAt: t.completed_at || undefined,
+    }));
+  }, [todos]);
 
   const summary = useMemo(() => {
     const currentMonth = new Date().toISOString().substring(0, 7);
@@ -21,25 +64,27 @@ export default function Dashboard() {
 
     const monthlyIncome = monthlyTransactions
       .filter((t) => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const monthlyExpense = monthlyTransactions
       .filter((t) => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const totalIncome = transactions
       .filter((t) => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const totalExpense = transactions
       .filter((t) => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    const totalBalance = initialBalance + totalIncome - totalExpense;
+    const totalBalance = Number(initialBalance) + totalIncome - totalExpense;
 
     const currentMonthBudgets = budgets.filter((b) => b.month === currentMonth);
-    const totalBudget = currentMonthBudgets.reduce((sum, b) => sum + b.amount, 0);
-    const totalSpent = currentMonthBudgets.reduce((sum, b) => sum + b.spent, 0);
+    const totalBudget = currentMonthBudgets.reduce((sum, b) => sum + Number(b.amount), 0);
+    
+    // Calculate actual spent from transactions
+    const totalSpent = monthlyExpense;
     const budgetRemaining = totalBudget - totalSpent;
 
     return {
@@ -50,6 +95,14 @@ export default function Dashboard() {
       totalBudget,
     };
   }, [transactions, budgets, initialBalance]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -88,16 +141,16 @@ export default function Dashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SpendingChart transactions={transactions} currency={currency} />
-        <CategoryChart transactions={transactions} categories={categories} currency={currency} />
+        <SpendingChart transactions={transformedTransactions} currency={currency} />
+        <CategoryChart transactions={transformedTransactions} categories={transformedCategories} currency={currency} />
       </div>
 
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <QuickTodoWidget todos={todos} onToggle={toggleTodo} />
+        <QuickTodoWidget todos={transformedTodos} onToggle={toggleTodo} />
         <RecentTransactions
-          transactions={transactions}
-          categories={categories}
+          transactions={transformedTransactions}
+          categories={transformedCategories}
           currency={currency}
         />
       </div>
