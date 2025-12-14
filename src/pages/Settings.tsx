@@ -1,38 +1,36 @@
 import { useState } from 'react';
-import { Settings as SettingsIcon, Trash2, Download, AlertTriangle } from 'lucide-react';
+import { Settings as SettingsIcon, Trash2, Download, AlertTriangle, Loader2, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useSettings, useTransactions, useBudgets, useTodos, useCategories } from '@/hooks/useStore';
+import { useDbProfile, useDbTransactions, useDbCategories } from '@/hooks/useSupabaseStore';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 export default function Settings() {
-  const { currency, setCurrency, initialBalance, setInitialBalance, resetAllData } = useSettings();
-  const { transactions } = useTransactions();
-  const { budgets } = useBudgets();
-  const { todos } = useTodos();
-  const { categories } = useCategories();
+  const { profile, loading, updateProfile } = useDbProfile();
+  const { transactions } = useDbTransactions();
+  const { categories } = useDbCategories();
+  const { user, signOut } = useAuth();
 
-  const [tempCurrency, setTempCurrency] = useState(currency);
-  const [tempBalance, setTempBalance] = useState(initialBalance.toString());
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [tempCurrency, setTempCurrency] = useState(profile?.currency || 'IDR');
+  const [tempBalance, setTempBalance] = useState(profile?.initial_balance?.toString() || '0');
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
-    setCurrency(tempCurrency);
-    setInitialBalance(parseFloat(tempBalance) || 0);
-    toast({
-      title: 'Settings saved',
-      description: 'Your preferences have been updated.',
+  const handleSave = async () => {
+    setSaving(true);
+    await updateProfile({
+      currency: tempCurrency,
+      initial_balance: parseFloat(tempBalance) || 0,
     });
+    setSaving(false);
   };
 
   const exportData = () => {
     const data = {
       transactions,
-      budgets,
-      todos,
       categories,
-      settings: { currency, initialBalance },
+      settings: { currency: profile?.currency, initialBalance: profile?.initial_balance },
       exportedAt: new Date().toISOString(),
     };
 
@@ -53,8 +51,8 @@ export default function Settings() {
   const exportCSV = () => {
     const headers = ['Date', 'Type', 'Category', 'Amount', 'Note', 'Payment Method'];
     const rows = transactions.map((t) => {
-      const category = categories.find((c) => c.id === t.categoryId);
-      return [t.date, t.type, category?.name || '', t.amount, t.note, t.paymentMethod].join(',');
+      const category = categories.find((c) => c.id === t.category_id);
+      return [t.date, t.type, category?.name || '', t.amount, t.note || '', t.payment_method].join(',');
     });
 
     const csv = [headers.join(','), ...rows].join('\n');
@@ -72,14 +70,13 @@ export default function Settings() {
     });
   };
 
-  const handleReset = () => {
-    resetAllData();
-    toast({
-      title: 'Data reset',
-      description: 'All data has been cleared.',
-      variant: 'destructive',
-    });
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -87,6 +84,31 @@ export default function Settings() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Settings</h1>
         <p className="text-muted-foreground">Manage your preferences and data</p>
+      </div>
+
+      {/* Account Info */}
+      <div className="glass-card p-6 space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-primary/20">
+            <User className="w-5 h-5 text-primary" />
+          </div>
+          <h2 className="font-semibold text-foreground">Account</h2>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-neon-cyan/20 to-neon-purple/20 border border-border flex items-center justify-center text-lg font-bold text-foreground">
+            {user?.email?.charAt(0).toUpperCase() || 'U'}
+          </div>
+          <div>
+            <p className="font-medium text-foreground">{profile?.name || 'User'}</p>
+            <p className="text-sm text-muted-foreground">{user?.email}</p>
+          </div>
+        </div>
+
+        <Button variant="outline" onClick={() => signOut()} className="mt-4">
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </Button>
       </div>
 
       {/* Currency & Balance */}
@@ -127,7 +149,8 @@ export default function Settings() {
           </div>
         </div>
 
-        <Button onClick={handleSave} variant="neon">
+        <Button onClick={handleSave} variant="neon" disabled={saving}>
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
           Save Settings
         </Button>
       </div>
@@ -157,37 +180,30 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Danger Zone */}
-      <div className="glass-card p-6 border-destructive/30 space-y-4">
+      {/* Data Info */}
+      <div className="glass-card p-6 space-y-4">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-destructive/20">
-            <Trash2 className="w-5 h-5 text-destructive" />
+          <div className="p-2 rounded-lg bg-success/20">
+            <AlertTriangle className="w-5 h-5 text-success" />
           </div>
-          <h2 className="font-semibold text-foreground">Danger Zone</h2>
+          <h2 className="font-semibold text-foreground">Cloud Sync</h2>
         </div>
 
         <p className="text-sm text-muted-foreground">
-          This action will permanently delete all your data including transactions, budgets, todos,
-          and categories. This cannot be undone.
+          Your data is automatically synced to the cloud and accessible from any device.
+          All your transactions, budgets, goals, and todos are securely stored.
         </p>
 
-        {showResetConfirm ? (
-          <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/30">
-            <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
-            <p className="text-sm text-foreground flex-1">Are you sure? This cannot be undone.</p>
-            <Button variant="ghost" size="sm" onClick={() => setShowResetConfirm(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" size="sm" onClick={handleReset}>
-              Yes, Delete All
-            </Button>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="p-3 rounded-lg bg-muted/30">
+            <p className="text-muted-foreground">Transactions</p>
+            <p className="font-semibold text-foreground">{transactions.length}</p>
           </div>
-        ) : (
-          <Button variant="destructive" onClick={() => setShowResetConfirm(true)}>
-            <Trash2 className="w-4 h-4" />
-            Reset All Data
-          </Button>
-        )}
+          <div className="p-3 rounded-lg bg-muted/30">
+            <p className="text-muted-foreground">Categories</p>
+            <p className="font-semibold text-foreground">{categories.length}</p>
+          </div>
+        </div>
       </div>
     </div>
   );

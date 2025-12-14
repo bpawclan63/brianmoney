@@ -1,34 +1,48 @@
 import { useState, useMemo } from 'react';
-import { Plus, CheckCircle2, Clock, ListTodo, Filter } from 'lucide-react';
+import { Plus, CheckCircle2, Clock, ListTodo, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TodoItem } from '@/components/todos/TodoItem';
 import { AddTodoDialog } from '@/components/todos/AddTodoDialog';
-import { useTodos } from '@/hooks/useStore';
+import { useDbTodos } from '@/hooks/useSupabaseStore';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { cn } from '@/lib/utils';
-import { TodoStatus, Priority } from '@/types';
 
-type FilterStatus = 'all' | TodoStatus;
+type FilterStatus = 'all' | 'active' | 'done';
 type SortOption = 'priority' | 'dueDate' | 'created';
+type Priority = 'low' | 'medium' | 'high';
 
 export default function Todos() {
-  const { todos, addTodo, toggleTodo, deleteTodo } = useTodos();
+  const { todos, loading, addTodo, toggleTodo, deleteTodo } = useDbTodos();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
   const [sortBy, setSortBy] = useState<SortOption>('priority');
+
+  // Transform todos for components
+  const transformedTodos = useMemo(() => {
+    return todos.map((t) => ({
+      id: t.id,
+      title: t.title,
+      description: t.description || undefined,
+      dueDate: t.due_date || undefined,
+      priority: t.priority,
+      status: t.status,
+      createdAt: t.created_at,
+      completedAt: t.completed_at || undefined,
+    }));
+  }, [todos]);
 
   const stats = useMemo(() => {
     const active = todos.filter((t) => t.status === 'active').length;
     const completed = todos.filter((t) => t.status === 'done').length;
     const overdue = todos.filter(
-      (t) => t.status === 'active' && t.dueDate && new Date(t.dueDate) < new Date()
+      (t) => t.status === 'active' && t.due_date && new Date(t.due_date) < new Date()
     ).length;
 
     return { total: todos.length, active, completed, overdue };
   }, [todos]);
 
   const filteredAndSortedTodos = useMemo(() => {
-    let filtered = todos;
+    let filtered = transformedTodos;
 
     if (statusFilter !== 'all') {
       filtered = filtered.filter((t) => t.status === statusFilter);
@@ -51,7 +65,25 @@ export default function Todos() {
           return 0;
       }
     });
-  }, [todos, statusFilter, sortBy]);
+  }, [transformedTodos, statusFilter, sortBy]);
+
+  const handleAddTodo = async (todo: { title: string; description?: string; dueDate?: string; priority: Priority }) => {
+    await addTodo({
+      title: todo.title,
+      description: todo.description || null,
+      due_date: todo.dueDate || null,
+      priority: todo.priority,
+    });
+    setIsDialogOpen(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -167,7 +199,7 @@ export default function Todos() {
       <AddTodoDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        onAdd={addTodo}
+        onAdd={handleAddTodo}
       />
     </div>
   );
