@@ -14,7 +14,315 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      budgets: {
+        Row: {
+          amount: number
+          category_id: string
+          created_at: string | null
+          id: string
+          month: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category_id: string
+          created_at?: string | null
+          id?: string
+          month: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string
+          created_at?: string | null
+          id?: string
+          month?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          color: string
+          created_at: string | null
+          icon: string
+          id: string
+          is_default: boolean | null
+          name: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          color: string
+          created_at?: string | null
+          icon: string
+          id?: string
+          is_default?: boolean | null
+          name: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string | null
+          icon?: string
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      financial_goals: {
+        Row: {
+          color: string | null
+          completed_at: string | null
+          created_at: string | null
+          current_amount: number | null
+          deadline: string | null
+          icon: string | null
+          id: string
+          name: string
+          target_amount: number
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          current_amount?: number | null
+          deadline?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          target_amount: number
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          current_amount?: number | null
+          deadline?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          target_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          reference_id: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          reference_id?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          reference_id?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          email: string
+          id: string
+          initial_balance: number | null
+          name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          email: string
+          id: string
+          initial_balance?: number | null
+          name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          email?: string
+          id?: string
+          initial_balance?: number | null
+          name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      recurring_transactions: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string | null
+          id: string
+          interval: Database["public"]["Enums"]["recurrence_interval"]
+          is_active: boolean | null
+          name: string
+          next_date: string
+          note: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          interval: Database["public"]["Enums"]["recurrence_interval"]
+          is_active?: boolean | null
+          name: string
+          next_date: string
+          note?: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          interval?: Database["public"]["Enums"]["recurrence_interval"]
+          is_active?: boolean | null
+          name?: string
+          next_date?: string
+          note?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          type?: Database["public"]["Enums"]["transaction_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      todos: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: Database["public"]["Enums"]["priority_level"] | null
+          status: Database["public"]["Enums"]["todo_status"] | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["priority_level"] | null
+          status?: Database["public"]["Enums"]["todo_status"] | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["priority_level"] | null
+          status?: Database["public"]["Enums"]["todo_status"] | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string | null
+          date: string
+          id: string
+          note: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          recurring_id: string | null
+          tags: string[] | null
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          created_at?: string | null
+          date: string
+          id?: string
+          note?: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          recurring_id?: string | null
+          tags?: string[] | null
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          note?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          recurring_id?: string | null
+          tags?: string[] | null
+          type?: Database["public"]["Enums"]["transaction_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +331,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      notification_type:
+        | "bill_reminder"
+        | "todo_overdue"
+        | "budget_warning"
+        | "goal_milestone"
+      payment_method: "cash" | "bank" | "e-wallet"
+      priority_level: "low" | "medium" | "high"
+      recurrence_interval: "daily" | "weekly" | "monthly" | "yearly"
+      todo_status: "active" | "done"
+      transaction_type: "income" | "expense"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +467,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      notification_type: [
+        "bill_reminder",
+        "todo_overdue",
+        "budget_warning",
+        "goal_milestone",
+      ],
+      payment_method: ["cash", "bank", "e-wallet"],
+      priority_level: ["low", "medium", "high"],
+      recurrence_interval: ["daily", "weekly", "monthly", "yearly"],
+      todo_status: ["active", "done"],
+      transaction_type: ["income", "expense"],
+    },
   },
 } as const
