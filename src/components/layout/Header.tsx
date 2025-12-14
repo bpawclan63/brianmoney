@@ -1,6 +1,8 @@
-import { Menu, Search, Bell, User } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -8,6 +10,8 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, title = 'Dashboard' }: HeaderProps) {
+  const { user } = useAuth();
+
   return (
     <header className="h-16 border-b border-border bg-card/30 backdrop-blur-xl sticky top-0 z-30">
       <div className="h-full flex items-center justify-between px-4 lg:px-6">
@@ -34,23 +38,12 @@ export function Header({ onMenuClick, title = 'Dashboard' }: HeaderProps) {
           </div>
 
           {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative text-muted-foreground hover:text-foreground"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse-glow" />
-          </Button>
+          <NotificationDropdown />
 
           {/* Profile */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-9 h-9 rounded-full bg-gradient-to-br from-neon-cyan/20 to-neon-purple/20 border border-border hover:border-primary/30"
-          >
-            <User className="w-5 h-5 text-foreground" />
-          </Button>
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-neon-cyan/20 to-neon-purple/20 border border-border flex items-center justify-center text-sm font-bold text-foreground">
+            {user?.email?.charAt(0).toUpperCase() || 'U'}
+          </div>
         </div>
       </div>
     </header>
