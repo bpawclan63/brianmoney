@@ -10,8 +10,12 @@ import {
   Info,
   ChevronLeft,
   Wallet,
+  Target,
+  Repeat,
+  LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -22,6 +26,8 @@ const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { path: '/budgets', label: 'Budgets', icon: PiggyBank },
+  { path: '/goals', label: 'Goals', icon: Target },
+  { path: '/recurring', label: 'Recurring', icon: Repeat },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/todos', label: 'Todo List', icon: CheckSquare },
 ];
@@ -33,6 +39,7 @@ const bottomNavItems = [
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const location = useLocation();
+  const { signOut } = useAuth();
 
   return (
     <>
@@ -152,6 +159,25 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               </NavLink>
             );
           })}
+          
+          {/* Logout */}
+          <button
+            onClick={() => signOut()}
+            className={cn(
+              'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 w-full',
+              'hover:bg-destructive/10 group text-muted-foreground hover:text-destructive'
+            )}
+          >
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <span
+              className={cn(
+                'font-medium whitespace-nowrap transition-opacity duration-200',
+                isOpen ? 'opacity-100' : 'opacity-0 lg:hidden'
+              )}
+            >
+              Sign Out
+            </span>
+          </button>
         </div>
       </aside>
     </>
