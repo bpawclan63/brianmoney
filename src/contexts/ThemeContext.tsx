@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'light' | 'dark';
+export type Theme = 'dark' | 'light' | 'lavender' | 'mint';
 
 interface ThemeContextType {
   theme: Theme;
@@ -10,32 +10,33 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const themeOrder: Theme[] = ['dark', 'light', 'lavender', 'mint'];
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    // Check localStorage first
     const stored = localStorage.getItem('flowly-theme') as Theme | null;
-    if (stored) return stored;
-    
-    // Default to dark mode
+    if (stored && themeOrder.includes(stored)) return stored;
     return 'dark';
   });
 
   useEffect(() => {
     const root = document.documentElement;
     
-    if (theme === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else {
-      root.classList.add('light');
-      root.classList.remove('dark');
-    }
+    // Remove all theme classes
+    root.classList.remove('dark', 'light', 'lavender', 'mint');
+    
+    // Add current theme class
+    root.classList.add(theme);
     
     localStorage.setItem('flowly-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setThemeState((prev) => {
+      const currentIndex = themeOrder.indexOf(prev);
+      const nextIndex = (currentIndex + 1) % themeOrder.length;
+      return themeOrder[nextIndex];
+    });
   };
 
   const setTheme = (newTheme: Theme) => {

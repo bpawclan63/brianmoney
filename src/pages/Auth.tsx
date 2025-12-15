@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, User, Sparkles, Eye, EyeOff, Loader2, Moon, Sun } from 'lucide-react';
+import { Mail, Lock, User, Sparkles, Eye, EyeOff, Loader2, Moon, Sun, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -185,16 +185,25 @@ export default function Auth() {
     return 'Create your account to get started.';
   };
 
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'dark': return <Sun className="h-5 w-5" />;
+      case 'light': return <Moon className="h-5 w-5" />;
+      case 'lavender': return <Sparkles className="h-5 w-5" />;
+      case 'mint': return <Leaf className="h-5 w-5" />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 theme-transition">
       {/* Theme Toggle */}
       <Button
         variant="ghost"
         size="icon"
         onClick={toggleTheme}
-        className="fixed top-4 right-4 z-50"
+        className="fixed top-4 right-4 z-50 hover:bg-primary/10"
       >
-        {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        {getThemeIcon()}
       </Button>
 
       {/* Background effects */}

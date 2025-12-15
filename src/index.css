@@ -3,6 +3,15 @@
 @tailwind utilities;
 
 @layer base {
+  /* Smooth theme transition */
+  :root {
+    --theme-transition: background-color 0.5s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  * {
+    transition: var(--theme-transition);
+  }
+
   /* Dark mode - default feminine pink-purple theme */
   :root,
   .dark {
@@ -105,8 +114,6 @@
     --input: 320 30% 92%;
     --ring: 330 75% 55%;
 
-    --radius: 1rem;
-
     /* Custom cute colors - softer for light mode */
     --neon-cyan: 180 60% 45%;
     --neon-purple: 280 60% 60%;
@@ -133,6 +140,132 @@
     --sidebar-border: 320 30% 88%;
     --sidebar-ring: 330 75% 55%;
   }
+
+  /* Lavender mode - dreamy purple theme */
+  .lavender {
+    --background: 270 30% 6%;
+    --foreground: 270 20% 98%;
+
+    --card: 270 25% 10%;
+    --card-foreground: 270 20% 98%;
+
+    --popover: 270 25% 10%;
+    --popover-foreground: 270 20% 98%;
+
+    --primary: 270 70% 70%;
+    --primary-foreground: 270 30% 6%;
+
+    --secondary: 300 50% 65%;
+    --secondary-foreground: 270 20% 98%;
+
+    --muted: 270 20% 18%;
+    --muted-foreground: 270 15% 55%;
+
+    --accent: 290 60% 65%;
+    --accent-foreground: 270 20% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 160 70% 45%;
+    --success-foreground: 270 20% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 270 30% 6%;
+
+    --border: 270 20% 20%;
+    --input: 270 20% 18%;
+    --ring: 270 70% 70%;
+
+    /* Custom colors - lavender theme */
+    --neon-cyan: 200 70% 60%;
+    --neon-purple: 270 70% 70%;
+    --neon-blue: 240 70% 65%;
+    --neon-pink: 300 60% 65%;
+    --neon-green: 160 70% 50%;
+
+    /* Gradients - lavender */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--neon-purple)) 0%, hsl(var(--neon-pink)) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(270 25% 12% / 0.8) 0%, hsl(270 25% 8% / 0.9) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(var(--neon-purple) / 0.15) 0%, transparent 70%);
+
+    /* Shadows - purple glow */
+    --shadow-glow-cyan: 0 0 20px hsl(var(--neon-purple) / 0.3), 0 0 40px hsl(var(--neon-purple) / 0.1);
+    --shadow-glow-purple: 0 0 20px hsl(var(--neon-pink) / 0.3), 0 0 40px hsl(var(--neon-pink) / 0.1);
+    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.4);
+
+    --sidebar-background: 270 25% 8%;
+    --sidebar-foreground: 270 20% 98%;
+    --sidebar-primary: 270 70% 70%;
+    --sidebar-primary-foreground: 270 30% 6%;
+    --sidebar-accent: 270 20% 14%;
+    --sidebar-accent-foreground: 270 20% 98%;
+    --sidebar-border: 270 20% 18%;
+    --sidebar-ring: 270 70% 70%;
+  }
+
+  /* Mint mode - fresh green theme */
+  .mint {
+    --background: 160 30% 5%;
+    --foreground: 160 20% 98%;
+
+    --card: 160 25% 9%;
+    --card-foreground: 160 20% 98%;
+
+    --popover: 160 25% 9%;
+    --popover-foreground: 160 20% 98%;
+
+    --primary: 160 70% 55%;
+    --primary-foreground: 160 30% 5%;
+
+    --secondary: 180 50% 60%;
+    --secondary-foreground: 160 20% 98%;
+
+    --muted: 160 20% 16%;
+    --muted-foreground: 160 15% 55%;
+
+    --accent: 140 60% 50%;
+    --accent-foreground: 160 20% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 160 70% 45%;
+    --success-foreground: 160 20% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 160 30% 5%;
+
+    --border: 160 20% 18%;
+    --input: 160 20% 16%;
+    --ring: 160 70% 55%;
+
+    /* Custom colors - mint theme */
+    --neon-cyan: 180 70% 55%;
+    --neon-purple: 200 60% 60%;
+    --neon-blue: 200 70% 60%;
+    --neon-pink: 160 70% 55%;
+    --neon-green: 140 70% 50%;
+
+    /* Gradients - mint */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--neon-pink)) 0%, hsl(var(--neon-cyan)) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(160 25% 11% / 0.8) 0%, hsl(160 25% 7% / 0.9) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(var(--neon-pink) / 0.15) 0%, transparent 70%);
+
+    /* Shadows - mint glow */
+    --shadow-glow-cyan: 0 0 20px hsl(var(--neon-pink) / 0.3), 0 0 40px hsl(var(--neon-pink) / 0.1);
+    --shadow-glow-purple: 0 0 20px hsl(var(--neon-cyan) / 0.3), 0 0 40px hsl(var(--neon-cyan) / 0.1);
+    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.4);
+
+    --sidebar-background: 160 25% 7%;
+    --sidebar-foreground: 160 20% 98%;
+    --sidebar-primary: 160 70% 55%;
+    --sidebar-primary-foreground: 160 30% 5%;
+    --sidebar-accent: 160 20% 13%;
+    --sidebar-accent-foreground: 160 20% 98%;
+    --sidebar-border: 160 20% 16%;
+    --sidebar-ring: 160 70% 55%;
+  }
 }
 
 @layer base {
@@ -145,7 +278,7 @@
     font-family: 'Nunito', 'Quicksand', sans-serif;
   }
 
-  /* Custom scrollbar - pink themed */
+  /* Custom scrollbar - themed */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -186,7 +319,7 @@
     transform: translateY(-2px);
   }
 
-  /* Neon text effects - pink themed */
+  /* Neon text effects - themed */
   .text-neon-cyan {
     color: hsl(var(--neon-pink));
     text-shadow: 0 0 10px hsl(var(--neon-pink) / 0.5);
@@ -205,13 +338,13 @@
     text-shadow: none;
   }
 
-  /* Gradient text - pink to purple */
+  /* Gradient text */
   .text-gradient {
     @apply bg-clip-text text-transparent;
     background-image: var(--gradient-primary);
   }
 
-  /* Glow effects - pink themed */
+  /* Glow effects */
   .glow-cyan {
     box-shadow: var(--shadow-glow-cyan);
   }
@@ -239,7 +372,7 @@
     pointer-events: none;
   }
 
-  /* Progress bar styles - softer colors */
+  /* Progress bar styles */
   .progress-safe {
     @apply bg-gradient-to-r from-emerald-400 to-teal-400;
   }
@@ -252,7 +385,7 @@
     @apply bg-gradient-to-r from-rose-400 to-pink-400;
   }
 
-  /* Priority badges - softer colors */
+  /* Priority badges */
   .priority-high {
     @apply bg-rose-500/20 text-rose-400 border-rose-500/30;
   }
@@ -337,6 +470,14 @@
 
   .animate-pulse-slow {
     animation: pulse 3s ease-in-out infinite;
+  }
+
+  /* Theme transition animation */
+  .theme-transition {
+    transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Staggered animations */
