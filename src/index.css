@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  /* Dark mode - default feminine pink-purple theme */
+  :root,
+  .dark {
     --background: 320 25% 4%;
     --foreground: 320 20% 98%;
 
@@ -66,6 +68,71 @@
     --sidebar-border: 320 20% 15%;
     --sidebar-ring: 330 85% 65%;
   }
+
+  /* Light mode - soft pink-lavender theme */
+  .light {
+    --background: 320 40% 96%;
+    --foreground: 320 30% 15%;
+
+    --card: 320 35% 98%;
+    --card-foreground: 320 30% 15%;
+
+    --popover: 320 35% 98%;
+    --popover-foreground: 320 30% 15%;
+
+    --primary: 330 75% 55%;
+    --primary-foreground: 320 40% 98%;
+
+    --secondary: 280 50% 75%;
+    --secondary-foreground: 280 40% 20%;
+
+    --muted: 320 30% 90%;
+    --muted-foreground: 320 20% 45%;
+
+    --accent: 350 65% 60%;
+    --accent-foreground: 320 40% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 160 60% 40%;
+    --success-foreground: 320 40% 98%;
+
+    --warning: 38 85% 50%;
+    --warning-foreground: 320 30% 15%;
+
+    --border: 320 30% 85%;
+    --input: 320 30% 92%;
+    --ring: 330 75% 55%;
+
+    --radius: 1rem;
+
+    /* Custom cute colors - softer for light mode */
+    --neon-cyan: 180 60% 45%;
+    --neon-purple: 280 60% 60%;
+    --neon-blue: 220 70% 55%;
+    --neon-pink: 330 75% 55%;
+    --neon-green: 160 60% 40%;
+
+    /* Gradients - softer pink to purple */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--neon-pink)) 0%, hsl(var(--neon-purple)) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(320 35% 98% / 0.9) 0%, hsl(320 40% 95% / 0.95) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(var(--neon-pink) / 0.1) 0%, transparent 70%);
+
+    /* Shadows - softer for light mode */
+    --shadow-glow-cyan: 0 0 20px hsl(var(--neon-pink) / 0.2), 0 0 40px hsl(var(--neon-pink) / 0.05);
+    --shadow-glow-purple: 0 0 20px hsl(var(--neon-purple) / 0.2), 0 0 40px hsl(var(--neon-purple) / 0.05);
+    --shadow-card: 0 4px 24px hsl(320 30% 50% / 0.1);
+
+    --sidebar-background: 320 35% 97%;
+    --sidebar-foreground: 320 30% 15%;
+    --sidebar-primary: 330 75% 55%;
+    --sidebar-primary-foreground: 320 40% 98%;
+    --sidebar-accent: 320 35% 92%;
+    --sidebar-accent-foreground: 320 30% 15%;
+    --sidebar-border: 320 30% 88%;
+    --sidebar-ring: 330 75% 55%;
+  }
 }
 
 @layer base {
@@ -105,6 +172,10 @@
     box-shadow: var(--shadow-card);
   }
 
+  .light .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-border/30;
+  }
+
   .glass-card-hover {
     @apply glass-card transition-all duration-300;
   }
@@ -121,9 +192,17 @@
     text-shadow: 0 0 10px hsl(var(--neon-pink) / 0.5);
   }
 
+  .light .text-neon-cyan {
+    text-shadow: none;
+  }
+
   .text-neon-purple {
     color: hsl(var(--neon-purple));
     text-shadow: 0 0 10px hsl(var(--neon-purple) / 0.5);
+  }
+
+  .light .text-neon-purple {
+    text-shadow: none;
   }
 
   /* Gradient text - pink to purple */
@@ -178,12 +257,24 @@
     @apply bg-rose-500/20 text-rose-400 border-rose-500/30;
   }
 
+  .light .priority-high {
+    @apply bg-rose-500/10 text-rose-600 border-rose-500/20;
+  }
+
   .priority-medium {
     @apply bg-amber-500/20 text-amber-400 border-amber-500/30;
   }
 
+  .light .priority-medium {
+    @apply bg-amber-500/10 text-amber-600 border-amber-500/20;
+  }
+
   .priority-low {
     @apply bg-emerald-500/20 text-emerald-400 border-emerald-500/30;
+  }
+
+  .light .priority-low {
+    @apply bg-emerald-500/10 text-emerald-600 border-emerald-500/20;
   }
 
   /* Transaction type badges */
@@ -191,8 +282,16 @@
     @apply bg-emerald-500/20 text-emerald-400 border-emerald-500/30;
   }
 
+  .light .badge-income {
+    @apply bg-emerald-500/10 text-emerald-600 border-emerald-500/20;
+  }
+
   .badge-expense {
     @apply bg-rose-500/20 text-rose-400 border-rose-500/30;
+  }
+
+  .light .badge-expense {
+    @apply bg-rose-500/10 text-rose-600 border-rose-500/20;
   }
 }
 
@@ -207,6 +306,19 @@
     }
     to {
       box-shadow: 0 0 20px hsl(var(--neon-pink) / 0.5), 0 0 30px hsl(var(--neon-pink) / 0.3);
+    }
+  }
+
+  .light .animate-glow {
+    animation: glow-light 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow-light {
+    from {
+      box-shadow: 0 0 10px hsl(var(--neon-pink) / 0.15);
+    }
+    to {
+      box-shadow: 0 0 20px hsl(var(--neon-pink) / 0.25), 0 0 30px hsl(var(--neon-pink) / 0.15);
     }
   }
 
