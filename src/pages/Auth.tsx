@@ -412,6 +412,12 @@ export default function Auth() {
             </>
           )}
         </p>
+
+        <p className="text-center text-xs text-muted-foreground mt-4">
+          <a href="/admin-login" className="hover:underline opacity-50 hover:opacity-100">
+            Admin access
+          </a>
+        </p>
       </div>
     </div>
   );
