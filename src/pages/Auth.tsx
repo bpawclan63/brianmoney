@@ -17,6 +17,7 @@ const authSchema = z.object({
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -24,7 +25,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { user, signIn, signUp } = useAuth();
+  const { user, signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +36,11 @@ export default function Auth() {
 
   const validateForm = () => {
     try {
+      if (isForgotPassword) {
+        z.string().email('Invalid email address').parse(email);
+        setErrors({});
+        return true;
+      }
       authSchema.parse({
         email,
         password,
@@ -64,7 +70,22 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (isForgotPassword) {
+        const { error } = await resetPassword(email);
+        if (error) {
+          toast({
+            title: 'Failed to send reset email',
+            description: error.message,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Reset email sent!',
+            description: 'Check your inbox for the password reset link.',
+          });
+          setIsForgotPassword(false);
+        }
+      } else if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
@@ -130,41 +151,54 @@ export default function Auth() {
           </div>
           <h1 className="text-3xl font-bold text-gradient">FinanceFlow</h1>
           <p className="text-muted-foreground mt-2">
-            {isLogin ? 'Welcome back! Sign in to continue.' : 'Create your account to get started.'}
+            {isForgotPassword 
+              ? 'Enter your email to reset your password.' 
+              : isLogin 
+                ? 'Welcome back! Sign in to continue.' 
+                : 'Create your account to get started.'}
           </p>
         </div>
 
         {/* Auth Card */}
         <div className="glass-card p-8">
           {/* Toggle */}
-          <div className="flex gap-2 p-1 bg-muted/50 rounded-lg mb-6">
-            <button
-              onClick={() => setIsLogin(true)}
-              className={cn(
-                'flex-1 py-2.5 text-sm font-medium rounded-md transition-all',
-                isLogin
-                  ? 'bg-primary/20 text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => setIsLogin(false)}
-              className={cn(
-                'flex-1 py-2.5 text-sm font-medium rounded-md transition-all',
-                !isLogin
-                  ? 'bg-primary/20 text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              Sign Up
-            </button>
-          </div>
+          {!isForgotPassword && (
+            <div className="flex gap-2 p-1 bg-muted/50 rounded-lg mb-6">
+              <button
+                onClick={() => setIsLogin(true)}
+                className={cn(
+                  'flex-1 py-2.5 text-sm font-medium rounded-md transition-all',
+                  isLogin
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => setIsLogin(false)}
+                className={cn(
+                  'flex-1 py-2.5 text-sm font-medium rounded-md transition-all',
+                  !isLogin
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
+
+          {isForgotPassword && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-foreground">Reset Password</h2>
+              <p className="text-sm text-muted-foreground mt-1">We'll send you a link to reset your password.</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name (signup only) */}
-            {!isLogin && (
+            {!isLogin && !isForgotPassword && (
               <div>
                 <Label className="text-muted-foreground">Full Name</Label>
                 <div className="relative mt-1.5">
@@ -202,45 +236,71 @@ export default function Auth() {
             </div>
 
             {/* Password */}
-            <div>
-              <Label className="text-muted-foreground">Password</Label>
-              <div className="relative mt-1.5">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={cn('pl-10 pr-10', errors.password && 'border-destructive')}
-                />
+            {!isForgotPassword && (
+              <div>
+                <Label className="text-muted-foreground">Password</Label>
+                <div className="relative mt-1.5">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={cn('pl-10 pr-10', errors.password && 'border-destructive')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-destructive mt-1">{errors.password}</p>
+                )}
+              </div>
+            )}
+
+            {/* Forgot Password Link */}
+            {isLogin && !isForgotPassword && (
+              <div className="text-right">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setIsForgotPassword(true)}
+                  className="text-sm text-primary hover:underline"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  Forgot password?
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-sm text-destructive mt-1">{errors.password}</p>
-              )}
-            </div>
+            )}
 
             <Button type="submit" variant="neon" className="w-full" disabled={loading}>
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {isLogin ? 'Sign In' : 'Create Account'}
+              {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}
             </Button>
           </form>
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          {isLogin ? "Don't have an account? " : 'Already have an account? '}
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-primary hover:underline"
-          >
-            {isLogin ? 'Sign up' : 'Sign in'}
-          </button>
+          {isForgotPassword ? (
+            <button
+              onClick={() => setIsForgotPassword(false)}
+              className="text-primary hover:underline"
+            >
+              Back to sign in
+            </button>
+          ) : (
+            <>
+              {isLogin ? "Don't have an account? " : 'Already have an account? '}
+              <button
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-primary hover:underline"
+              >
+                {isLogin ? 'Sign up' : 'Sign in'}
+              </button>
+            </>
+          )}
         </p>
       </div>
     </div>
