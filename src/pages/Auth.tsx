@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, User, Wallet, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Sparkles, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -167,7 +167,7 @@ export default function Auth() {
         } else {
           toast({
             title: 'Account created!',
-            description: 'You can now start using FinanceFlow.',
+            description: 'You can now start using Flowly.',
           });
         }
       }
@@ -187,17 +187,17 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       {/* Background effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-neon-cyan/10 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-neon-pink/10 rounded-full blur-3xl animate-pulse-slow" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-neon-purple/10 rounded-full blur-3xl animate-pulse-slow" />
       </div>
 
       <div className="w-full max-w-md relative">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center glow-cyan mb-4">
-            <Wallet className="w-8 h-8 text-primary-foreground" />
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-neon-pink to-neon-purple flex items-center justify-center glow-cyan mb-4">
+            <Sparkles className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-bold text-gradient">FinanceFlow</h1>
+          <h1 className="text-3xl font-bold text-gradient">Flowly</h1>
           <p className="text-muted-foreground mt-2">{getHeaderText()}</p>
         </div>
 

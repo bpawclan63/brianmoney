@@ -1,18 +1,18 @@
-import { Wallet, BarChart3, CheckSquare, PiggyBank, Sparkles, Shield, Zap } from 'lucide-react';
+import { Sparkles, BarChart3, CheckSquare, PiggyBank, Heart, Shield, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const features = [
   {
-    icon: Wallet,
+    icon: Sparkles,
     title: 'Transaction Tracking',
     description: 'Track all your income and expenses with detailed categorization and payment methods.',
-    color: 'from-neon-cyan to-neon-blue',
+    color: 'from-neon-pink to-neon-purple',
   },
   {
     icon: PiggyBank,
     title: 'Smart Budgeting',
     description: 'Set monthly budgets for each category and get alerts when spending approaches limits.',
-    color: 'from-neon-purple to-neon-pink',
+    color: 'from-neon-purple to-neon-blue',
   },
   {
     icon: BarChart3,
@@ -24,7 +24,7 @@ const features = [
     icon: CheckSquare,
     title: 'Todo Integration',
     description: 'Built-in task manager to track financial tasks, bills, and reminders.',
-    color: 'from-amber-500 to-orange-500',
+    color: 'from-amber-400 to-orange-400',
   },
 ];
 
@@ -42,20 +42,20 @@ export default function About() {
       <div className="relative text-center py-16 px-4">
         {/* Background effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neon-cyan/10 rounded-full blur-3xl animate-pulse-slow" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neon-pink/10 rounded-full blur-3xl animate-pulse-slow" />
           <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-neon-purple/10 rounded-full blur-3xl animate-float" />
         </div>
 
         <div className="relative">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-cyan to-neon-purple mb-6 glow-cyan animate-bounce-subtle">
-            <Wallet className="w-10 h-10 text-primary-foreground" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-pink to-neon-purple mb-6 glow-cyan animate-bounce-subtle">
+            <Sparkles className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">
-            <span className="text-gradient">FinanceFlow</span>
+            <span className="text-gradient">Flowly</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            A futuristic personal finance management app designed to help you track expenses,
-            manage budgets, and achieve your financial goals.
+            Aplikasi keuangan pribadi yang cantik dan mudah digunakan untuk mahasiswa.
+            Kelola pengeluaran, budget, dan capai tujuan finansialmu! ✨
           </p>
         </div>
       </div>
@@ -78,7 +78,7 @@ export default function About() {
 
       {/* Features */}
       <div>
-        <h2 className="text-2xl font-bold text-foreground text-center mb-8">Key Features</h2>
+        <h2 className="text-2xl font-bold text-foreground text-center mb-8">Fitur Utama ✨</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {features.map((feature, index) => (
             <div
@@ -105,33 +105,33 @@ export default function About() {
 
       {/* Why Choose */}
       <div className="glass-card p-8">
-        <h2 className="text-2xl font-bold text-foreground text-center mb-8">Why FinanceFlow?</h2>
+        <h2 className="text-2xl font-bold text-foreground text-center mb-8">Kenapa Flowly? 💕</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-neon-cyan/20 mb-4">
-              <Sparkles className="w-6 h-6 text-neon-cyan" />
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-neon-pink/20 mb-4">
+              <Heart className="w-6 h-6 text-neon-pink" />
             </div>
-            <h3 className="font-semibold text-foreground mb-2">Beautiful Design</h3>
+            <h3 className="font-semibold text-foreground mb-2">Desain Cantik</h3>
             <p className="text-sm text-muted-foreground">
-              Modern, futuristic UI with smooth animations and glassmorphism effects.
+              UI modern dengan animasi halus dan efek glassmorphism yang aesthetic.
             </p>
           </div>
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-neon-purple/20 mb-4">
               <Shield className="w-6 h-6 text-neon-purple" />
             </div>
-            <h3 className="font-semibold text-foreground mb-2">Privacy First</h3>
+            <h3 className="font-semibold text-foreground mb-2">Privasi Terjaga</h3>
             <p className="text-sm text-muted-foreground">
-              All your data is stored locally. No servers, no tracking, complete privacy.
+              Data keuanganmu aman dan terenkripsi. Tidak ada yang bisa mengakses datamu.
             </p>
           </div>
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-neon-green/20 mb-4">
               <Zap className="w-6 h-6 text-neon-green" />
             </div>
-            <h3 className="font-semibold text-foreground mb-2">Fast & Responsive</h3>
+            <h3 className="font-semibold text-foreground mb-2">Cepat & Responsif</h3>
             <p className="text-sm text-muted-foreground">
-              Optimized performance with instant updates and responsive design.
+              Performa optimal dengan update instan dan desain responsif.
             </p>
           </div>
         </div>
@@ -139,7 +139,7 @@ export default function About() {
 
       {/* Footer */}
       <div className="text-center text-muted-foreground text-sm">
-        <p>Built with ❤️ using React, TypeScript & Tailwind CSS</p>
+        <p>Dibuat dengan 💕 menggunakan React, TypeScript & Tailwind CSS</p>
         <p className="mt-2">Version 1.0.0</p>
       </div>
     </div>
