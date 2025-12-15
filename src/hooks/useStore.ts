@@ -3,12 +3,12 @@ import { Transaction, Budget, Todo, Category } from '@/types';
 import { defaultCategories, dummyTransactions, dummyBudgets, dummyTodos } from '@/lib/data';
 
 const STORAGE_KEYS = {
-  transactions: 'financeflow_transactions',
-  budgets: 'financeflow_budgets',
-  todos: 'financeflow_todos',
-  categories: 'financeflow_categories',
-  currency: 'financeflow_currency',
-  initialBalance: 'financeflow_initial_balance',
+  transactions: 'flowly_transactions',
+  budgets: 'flowly_budgets',
+  todos: 'flowly_todos',
+  categories: 'flowly_categories',
+  currency: 'flowly_currency',
+  initialBalance: 'flowly_initial_balance',
 };
 
 function loadFromStorage<T>(key: string, defaultValue: T): T {

@@ -9,7 +9,7 @@ import {
   Settings,
   Info,
   ChevronLeft,
-  Wallet,
+  Sparkles,
   Target,
   Repeat,
   LogOut,
@@ -63,8 +63,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center glow-cyan">
-              <Wallet className="w-5 h-5 text-primary-foreground" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-pink to-neon-purple flex items-center justify-center glow-cyan">
+              <Sparkles className="w-5 h-5 text-primary-foreground" />
             </div>
             <span
               className={cn(
@@ -72,7 +72,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 isOpen ? 'opacity-100' : 'opacity-0 lg:hidden'
               )}
             >
-              FinanceFlow
+              Flowly
             </span>
           </div>
           <Button
