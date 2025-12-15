@@ -161,6 +161,7 @@ export type Database = {
           email: string
           id: string
           initial_balance: number | null
+          is_active: boolean | null
           name: string | null
           updated_at: string | null
         }
@@ -170,6 +171,7 @@ export type Database = {
           email: string
           id: string
           initial_balance?: number | null
+          is_active?: boolean | null
           name?: string | null
           updated_at?: string | null
         }
@@ -179,6 +181,7 @@ export type Database = {
           email?: string
           id?: string
           initial_balance?: number | null
+          is_active?: boolean | null
           name?: string | null
           updated_at?: string | null
         }

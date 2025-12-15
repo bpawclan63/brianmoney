@@ -9,6 +9,8 @@ interface UserProfile {
   name: string | null;
   currency: string | null;
   created_at: string | null;
+  is_active: boolean | null;
+  is_admin?: boolean;
 }
 
 interface UserTransaction {
@@ -18,6 +20,17 @@ interface UserTransaction {
   date: string;
   note: string | null;
   payment_method: string;
+}
+
+interface AdminStats {
+  totalUsers: number;
+  totalTransactions: number;
+  totalIncome: number;
+  totalExpense: number;
+  totalBudgets: number;
+  totalGoals: number;
+  activeUsers: number;
+  adminCount: number;
 }
 
 export function useIsAdmin() {
@@ -53,32 +66,104 @@ export function useIsAdmin() {
   return { isAdmin, loading };
 }
 
+export function useAdminStats() {
+  const [stats, setStats] = useState<AdminStats>({
+    totalUsers: 0,
+    totalTransactions: 0,
+    totalIncome: 0,
+    totalExpense: 0,
+    totalBudgets: 0,
+    totalGoals: 0,
+    activeUsers: 0,
+    adminCount: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true);
+
+      // Fetch all stats in parallel
+      const [
+        profilesRes,
+        transactionsRes,
+        budgetsRes,
+        goalsRes,
+        rolesRes,
+      ] = await Promise.all([
+        supabase.from('profiles').select('id, is_active'),
+        supabase.from('transactions').select('amount, type'),
+        supabase.from('budgets').select('id'),
+        supabase.from('financial_goals').select('id'),
+        supabase.from('user_roles').select('role').eq('role', 'admin'),
+      ]);
+
+      const profiles = profilesRes.data || [];
+      const transactions = transactionsRes.data || [];
+      const budgets = budgetsRes.data || [];
+      const goals = goalsRes.data || [];
+      const adminRoles = rolesRes.data || [];
+
+      const totalIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+      
+      const totalExpense = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+
+      setStats({
+        totalUsers: profiles.length,
+        totalTransactions: transactions.length,
+        totalIncome,
+        totalExpense,
+        totalBudgets: budgets.length,
+        totalGoals: goals.length,
+        activeUsers: profiles.filter(p => p.is_active !== false).length,
+        adminCount: adminRoles.length,
+      });
+
+      setLoading(false);
+    };
+
+    fetchStats();
+  }, []);
+
+  return { stats, loading };
+}
+
 export function useAdminUsers() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchUsers = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+    
+    // Fetch profiles and roles in parallel
+    const [profilesRes, rolesRes] = await Promise.all([
+      supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+      supabase.from('user_roles').select('user_id, role').eq('role', 'admin'),
+    ]);
 
-    if (error) {
-      console.error('Error fetching users:', error);
+    if (profilesRes.error) {
+      console.error('Error fetching users:', profilesRes.error);
       toast({
         title: 'Error',
         description: 'Failed to fetch users',
         variant: 'destructive',
       });
     } else {
-      setUsers(data || []);
+      const adminUserIds = new Set((rolesRes.data || []).map(r => r.user_id));
+      const usersWithRole = (profilesRes.data || []).map(user => ({
+        ...user,
+        is_admin: adminUserIds.has(user.id),
+      }));
+      setUsers(usersWithRole);
     }
     setLoading(false);
   };
 
   const deleteUser = async (userId: string) => {
-    // Delete from profiles (cascade will handle user_roles)
     const { error } = await supabase
       .from('profiles')
       .delete()
@@ -102,11 +187,76 @@ export function useAdminUsers() {
     return true;
   };
 
+  const toggleUserActive = async (userId: string, isActive: boolean) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_active: isActive })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Error updating user status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update user status',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    toast({
+      title: 'Success',
+      description: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
+    });
+    fetchUsers();
+    return true;
+  };
+
+  const toggleAdminRole = async (userId: string, makeAdmin: boolean) => {
+    if (makeAdmin) {
+      const { error } = await supabase
+        .from('user_roles')
+        .insert({ user_id: userId, role: 'admin' });
+
+      if (error) {
+        console.error('Error promoting user:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to promote user to admin',
+          variant: 'destructive',
+        });
+        return false;
+      }
+    } else {
+      const { error } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .eq('role', 'admin');
+
+      if (error) {
+        console.error('Error demoting user:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to remove admin role',
+          variant: 'destructive',
+        });
+        return false;
+      }
+    }
+
+    toast({
+      title: 'Success',
+      description: makeAdmin ? 'User promoted to admin' : 'Admin role removed',
+    });
+    fetchUsers();
+    return true;
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  return { users, loading, refetch: fetchUsers, deleteUser };
+  return { users, loading, refetch: fetchUsers, deleteUser, toggleUserActive, toggleAdminRole };
 }
 
 export function useUserTransactions(userId: string | null) {
