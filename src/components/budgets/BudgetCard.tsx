@@ -2,6 +2,7 @@ import { Budget, Category } from '@/types';
 import { formatCurrency } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { AlertTriangle } from 'lucide-react';
+import { getEmojiForCategory, iconToEmoji } from '@/lib/categoryEmojis';
 
 interface BudgetCardProps {
   budget: Budget;
@@ -28,17 +29,21 @@ export function BudgetCard({ budget, category, currency }: BudgetCardProps) {
   };
 
   const getStatusColor = () => {
-    if (isOverBudget) return 'text-red-400';
+    if (isOverBudget) return 'text-rose-400';
     if (isWarning) return 'text-amber-400';
     return 'text-emerald-400';
   };
+
+  const emoji = category?.icon 
+    ? (iconToEmoji[category.icon] || getEmojiForCategory(category.name))
+    : '📊';
 
   return (
     <div className="glass-card-hover p-5">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center text-2xl">
-            {category?.icon || '📊'}
+          <div className="w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center text-2xl">
+            {emoji}
           </div>
           <div>
             <h3 className="font-semibold text-foreground">{category?.name || 'Unknown'}</h3>
@@ -46,8 +51,8 @@ export function BudgetCard({ budget, category, currency }: BudgetCardProps) {
           </div>
         </div>
         {isOverBudget && (
-          <div className="p-2 rounded-lg bg-red-500/20">
-            <AlertTriangle className="w-5 h-5 text-red-400" />
+          <div className="p-2 rounded-lg bg-rose-500/20">
+            <AlertTriangle className="w-5 h-5 text-rose-400" />
           </div>
         )}
       </div>
@@ -81,7 +86,7 @@ export function BudgetCard({ budget, category, currency }: BudgetCardProps) {
           <p
             className={cn(
               'text-sm font-semibold',
-              remaining >= 0 ? 'text-emerald-400' : 'text-red-400'
+              remaining >= 0 ? 'text-emerald-400' : 'text-rose-400'
             )}
           >
             {formatCurrency(Math.abs(remaining), currency)}

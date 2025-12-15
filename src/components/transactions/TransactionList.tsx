@@ -5,6 +5,7 @@ import { formatCurrency, formatDate } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getEmojiForCategory, iconToEmoji } from '@/lib/categoryEmojis';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -96,6 +97,10 @@ export function TransactionList({ transactions, categories, currency, onDelete }
               <div className="glass-card divide-y divide-border/50">
                 {dayTransactions.map((transaction) => {
                   const category = getCategory(transaction.categoryId);
+                  // Get emoji from category icon or name
+                  const emoji = category?.icon 
+                    ? (iconToEmoji[category.icon] || getEmojiForCategory(category.name))
+                    : '💸';
                   return (
                     <div
                       key={transaction.id}
@@ -103,13 +108,13 @@ export function TransactionList({ transactions, categories, currency, onDelete }
                     >
                       <div
                         className={cn(
-                          'w-12 h-12 rounded-xl flex items-center justify-center text-xl',
+                          'w-12 h-12 rounded-2xl flex items-center justify-center text-xl',
                           transaction.type === 'income'
                             ? 'bg-emerald-500/20'
-                            : 'bg-red-500/20'
+                            : 'bg-rose-500/20'
                         )}
                       >
-                        {category?.icon || '💸'}
+                        {emoji}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-foreground">
@@ -133,7 +138,7 @@ export function TransactionList({ transactions, categories, currency, onDelete }
                               'font-semibold flex items-center gap-1',
                               transaction.type === 'income'
                                 ? 'text-emerald-400'
-                                : 'text-red-400'
+                                : 'text-rose-400'
                             )}
                           >
                             {transaction.type === 'income' ? (

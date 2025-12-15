@@ -16,16 +16,16 @@ interface StatCardProps {
 }
 
 const variantStyles = {
-  default: 'from-neon-cyan/10 to-transparent border-neon-cyan/20',
+  default: 'from-neon-pink/10 to-transparent border-neon-pink/20',
   income: 'from-emerald-500/10 to-transparent border-emerald-500/20',
-  expense: 'from-red-500/10 to-transparent border-red-500/20',
+  expense: 'from-rose-500/10 to-transparent border-rose-500/20',
   budget: 'from-neon-purple/10 to-transparent border-neon-purple/20',
 };
 
 const iconStyles = {
-  default: 'bg-neon-cyan/20 text-neon-cyan',
+  default: 'bg-neon-pink/20 text-neon-pink',
   income: 'bg-emerald-500/20 text-emerald-400',
-  expense: 'bg-red-500/20 text-red-400',
+  expense: 'bg-rose-500/20 text-rose-400',
   budget: 'bg-neon-purple/20 text-neon-purple',
 };
 
@@ -61,7 +61,7 @@ export function StatCard({
               <span
                 className={cn(
                   'text-xs font-medium',
-                  trend.isPositive ? 'text-emerald-400' : 'text-red-400'
+                  trend.isPositive ? 'text-emerald-400' : 'text-rose-400'
                 )}
               >
                 {trend.isPositive ? '+' : ''}{trend.value}%
