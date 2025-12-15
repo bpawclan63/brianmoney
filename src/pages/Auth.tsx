@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, User, Wallet, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,27 +15,52 @@ const authSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').optional(),
 });
 
+const passwordSchema = z.object({
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 export default function Auth() {
+  const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { user, signIn, signUp, resetPassword } = useAuth();
+  const { user, signIn, signUp, resetPassword, updatePassword } = useAuth();
   const navigate = useNavigate();
 
+  // Check for recovery mode from URL
   useEffect(() => {
-    if (user) {
+    const type = searchParams.get('type');
+    if (type === 'recovery') {
+      setIsRecoveryMode(true);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    // Don't redirect if in recovery mode (user needs to set new password)
+    if (user && !isRecoveryMode) {
       navigate('/', { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, isRecoveryMode]);
 
   const validateForm = () => {
     try {
+      if (isRecoveryMode) {
+        passwordSchema.parse({ password, confirmPassword });
+        setErrors({});
+        return true;
+      }
       if (isForgotPassword) {
         z.string().email('Invalid email address').parse(email);
         setErrors({});
@@ -70,7 +95,23 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (isForgotPassword) {
+      if (isRecoveryMode) {
+        const { error } = await updatePassword(password);
+        if (error) {
+          toast({
+            title: 'Failed to update password',
+            description: error.message,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Password updated!',
+            description: 'Your password has been successfully changed.',
+          });
+          setIsRecoveryMode(false);
+          navigate('/', { replace: true });
+        }
+      } else if (isForgotPassword) {
         const { error } = await resetPassword(email);
         if (error) {
           toast({
@@ -135,6 +176,13 @@ export default function Auth() {
     }
   };
 
+  const getHeaderText = () => {
+    if (isRecoveryMode) return 'Set your new password.';
+    if (isForgotPassword) return 'Enter your email to reset your password.';
+    if (isLogin) return 'Welcome back! Sign in to continue.';
+    return 'Create your account to get started.';
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       {/* Background effects */}
@@ -150,19 +198,13 @@ export default function Auth() {
             <Wallet className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-bold text-gradient">FinanceFlow</h1>
-          <p className="text-muted-foreground mt-2">
-            {isForgotPassword 
-              ? 'Enter your email to reset your password.' 
-              : isLogin 
-                ? 'Welcome back! Sign in to continue.' 
-                : 'Create your account to get started.'}
-          </p>
+          <p className="text-muted-foreground mt-2">{getHeaderText()}</p>
         </div>
 
         {/* Auth Card */}
         <div className="glass-card p-8">
-          {/* Toggle */}
-          {!isForgotPassword && (
+          {/* Toggle - Only show for login/signup */}
+          {!isForgotPassword && !isRecoveryMode && (
             <div className="flex gap-2 p-1 bg-muted/50 rounded-lg mb-6">
               <button
                 onClick={() => setIsLogin(true)}
@@ -196,9 +238,16 @@ export default function Auth() {
             </div>
           )}
 
+          {isRecoveryMode && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-foreground">New Password</h2>
+              <p className="text-sm text-muted-foreground mt-1">Enter your new password below.</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name (signup only) */}
-            {!isLogin && !isForgotPassword && (
+            {!isLogin && !isForgotPassword && !isRecoveryMode && (
               <div>
                 <Label className="text-muted-foreground">Full Name</Label>
                 <div className="relative mt-1.5">
@@ -217,28 +266,32 @@ export default function Auth() {
               </div>
             )}
 
-            {/* Email */}
-            <div>
-              <Label className="text-muted-foreground">Email</Label>
-              <div className="relative mt-1.5">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={cn('pl-10', errors.email && 'border-destructive')}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-sm text-destructive mt-1">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Password */}
-            {!isForgotPassword && (
+            {/* Email - Not shown in recovery mode */}
+            {!isRecoveryMode && (
               <div>
-                <Label className="text-muted-foreground">Password</Label>
+                <Label className="text-muted-foreground">Email</Label>
+                <div className="relative mt-1.5">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={cn('pl-10', errors.email && 'border-destructive')}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-sm text-destructive mt-1">{errors.email}</p>
+                )}
+              </div>
+            )}
+
+            {/* Password - Show for login, signup, and recovery */}
+            {(!isForgotPassword || isRecoveryMode) && (
+              <div>
+                <Label className="text-muted-foreground">
+                  {isRecoveryMode ? 'New Password' : 'Password'}
+                </Label>
                 <div className="relative mt-1.5">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -262,8 +315,28 @@ export default function Auth() {
               </div>
             )}
 
+            {/* Confirm Password - Only for recovery mode */}
+            {isRecoveryMode && (
+              <div>
+                <Label className="text-muted-foreground">Confirm Password</Label>
+                <div className="relative mt-1.5">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={cn('pl-10 pr-10', errors.confirmPassword && 'border-destructive')}
+                  />
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-sm text-destructive mt-1">{errors.confirmPassword}</p>
+                )}
+              </div>
+            )}
+
             {/* Forgot Password Link */}
-            {isLogin && !isForgotPassword && (
+            {isLogin && !isForgotPassword && !isRecoveryMode && (
               <div className="text-right">
                 <button
                   type="button"
@@ -277,13 +350,29 @@ export default function Auth() {
 
             <Button type="submit" variant="neon" className="w-full" disabled={loading}>
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}
+              {isRecoveryMode 
+                ? 'Update Password' 
+                : isForgotPassword 
+                  ? 'Send Reset Link' 
+                  : isLogin 
+                    ? 'Sign In' 
+                    : 'Create Account'}
             </Button>
           </form>
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          {isForgotPassword ? (
+          {isRecoveryMode ? (
+            <button
+              onClick={() => {
+                setIsRecoveryMode(false);
+                navigate('/auth', { replace: true });
+              }}
+              className="text-primary hover:underline"
+            >
+              Back to sign in
+            </button>
+          ) : isForgotPassword ? (
             <button
               onClick={() => setIsForgotPassword(false)}
               className="text-primary hover:underline"
