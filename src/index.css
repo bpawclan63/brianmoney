@@ -2,71 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-
 @layer base {
   :root {
-    --background: 240 10% 4%;
-    --foreground: 210 40% 98%;
+    --background: 320 25% 4%;
+    --foreground: 320 20% 98%;
 
-    --card: 240 10% 8%;
-    --card-foreground: 210 40% 98%;
+    --card: 320 20% 8%;
+    --card-foreground: 320 20% 98%;
 
-    --popover: 240 10% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 320 20% 8%;
+    --popover-foreground: 320 20% 98%;
 
-    --primary: 186 100% 50%;
-    --primary-foreground: 240 10% 4%;
+    --primary: 330 85% 65%;
+    --primary-foreground: 320 25% 4%;
 
-    --secondary: 270 60% 60%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 280 60% 70%;
+    --secondary-foreground: 320 20% 98%;
 
-    --muted: 240 10% 15%;
-    --muted-foreground: 215 20% 55%;
+    --muted: 320 20% 15%;
+    --muted-foreground: 320 15% 55%;
 
-    --accent: 270 60% 60%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 350 75% 60%;
+    --accent-foreground: 320 20% 98%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    --success: 142 76% 36%;
-    --success-foreground: 210 40% 98%;
+    --success: 160 70% 45%;
+    --success-foreground: 320 20% 98%;
 
     --warning: 38 92% 50%;
-    --warning-foreground: 240 10% 4%;
+    --warning-foreground: 320 25% 4%;
 
-    --border: 240 10% 18%;
-    --input: 240 10% 15%;
-    --ring: 186 100% 50%;
+    --border: 320 20% 18%;
+    --input: 320 20% 15%;
+    --ring: 330 85% 65%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Custom neon colors */
-    --neon-cyan: 186 100% 50%;
-    --neon-purple: 270 60% 60%;
-    --neon-blue: 217 91% 60%;
-    --neon-pink: 330 80% 60%;
-    --neon-green: 142 76% 46%;
+    /* Custom cute colors - pink-purple theme */
+    --neon-cyan: 180 70% 60%;
+    --neon-purple: 280 70% 70%;
+    --neon-blue: 220 80% 65%;
+    --neon-pink: 330 85% 65%;
+    --neon-green: 160 70% 50%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--neon-cyan)) 0%, hsl(var(--neon-purple)) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(240 10% 10% / 0.8) 0%, hsl(240 10% 6% / 0.9) 100%);
-    --gradient-glow: radial-gradient(ellipse at center, hsl(var(--neon-cyan) / 0.15) 0%, transparent 70%);
+    /* Gradients - pink to purple */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--neon-pink)) 0%, hsl(var(--neon-purple)) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(320 20% 10% / 0.8) 0%, hsl(320 20% 6% / 0.9) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(var(--neon-pink) / 0.15) 0%, transparent 70%);
 
-    /* Shadows */
-    --shadow-glow-cyan: 0 0 20px hsl(var(--neon-cyan) / 0.3), 0 0 40px hsl(var(--neon-cyan) / 0.1);
+    /* Shadows - pink glow */
+    --shadow-glow-cyan: 0 0 20px hsl(var(--neon-pink) / 0.3), 0 0 40px hsl(var(--neon-pink) / 0.1);
     --shadow-glow-purple: 0 0 20px hsl(var(--neon-purple) / 0.3), 0 0 40px hsl(var(--neon-purple) / 0.1);
     --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.4);
 
-    --sidebar-background: 240 10% 6%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 186 100% 50%;
-    --sidebar-primary-foreground: 240 10% 4%;
-    --sidebar-accent: 240 10% 12%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 240 10% 15%;
-    --sidebar-ring: 186 100% 50%;
+    --sidebar-background: 320 20% 6%;
+    --sidebar-foreground: 320 20% 98%;
+    --sidebar-primary: 330 85% 65%;
+    --sidebar-primary-foreground: 320 25% 4%;
+    --sidebar-accent: 320 20% 12%;
+    --sidebar-accent-foreground: 320 20% 98%;
+    --sidebar-border: 320 20% 15%;
+    --sidebar-ring: 330 85% 65%;
   }
 }
 
@@ -76,11 +74,11 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Nunito', 'Quicksand', sans-serif;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar - pink themed */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -88,21 +86,22 @@
 
   ::-webkit-scrollbar-track {
     @apply bg-muted/30;
+    border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full;
+    @apply bg-primary/30 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
+    @apply bg-primary/50;
   }
 }
 
 @layer components {
-  /* Glassmorphism card */
+  /* Glassmorphism card - softer corners */
   .glass-card {
-    @apply bg-card/60 backdrop-blur-xl border border-border/50 rounded-xl;
+    @apply bg-card/60 backdrop-blur-xl border border-border/50 rounded-2xl;
     box-shadow: var(--shadow-card);
   }
 
@@ -113,12 +112,13 @@
   .glass-card-hover:hover {
     @apply border-primary/30;
     box-shadow: var(--shadow-glow-cyan);
+    transform: translateY(-2px);
   }
 
-  /* Neon text effects */
+  /* Neon text effects - pink themed */
   .text-neon-cyan {
-    color: hsl(var(--neon-cyan));
-    text-shadow: 0 0 10px hsl(var(--neon-cyan) / 0.5);
+    color: hsl(var(--neon-pink));
+    text-shadow: 0 0 10px hsl(var(--neon-pink) / 0.5);
   }
 
   .text-neon-purple {
@@ -126,13 +126,13 @@
     text-shadow: 0 0 10px hsl(var(--neon-purple) / 0.5);
   }
 
-  /* Gradient text */
+  /* Gradient text - pink to purple */
   .text-gradient {
     @apply bg-clip-text text-transparent;
     background-image: var(--gradient-primary);
   }
 
-  /* Glow effects */
+  /* Glow effects - pink themed */
   .glow-cyan {
     box-shadow: var(--shadow-glow-cyan);
   }
@@ -160,22 +160,22 @@
     pointer-events: none;
   }
 
-  /* Progress bar styles */
+  /* Progress bar styles - softer colors */
   .progress-safe {
-    @apply bg-gradient-to-r from-emerald-500 to-emerald-400;
+    @apply bg-gradient-to-r from-emerald-400 to-teal-400;
   }
 
   .progress-warning {
-    @apply bg-gradient-to-r from-amber-500 to-amber-400;
+    @apply bg-gradient-to-r from-amber-400 to-orange-400;
   }
 
   .progress-danger {
-    @apply bg-gradient-to-r from-red-500 to-red-400;
+    @apply bg-gradient-to-r from-rose-400 to-pink-400;
   }
 
-  /* Priority badges */
+  /* Priority badges - softer colors */
   .priority-high {
-    @apply bg-red-500/20 text-red-400 border-red-500/30;
+    @apply bg-rose-500/20 text-rose-400 border-rose-500/30;
   }
 
   .priority-medium {
@@ -192,7 +192,7 @@
   }
 
   .badge-expense {
-    @apply bg-red-500/20 text-red-400 border-red-500/30;
+    @apply bg-rose-500/20 text-rose-400 border-rose-500/30;
   }
 }
 
@@ -203,10 +203,10 @@
 
   @keyframes glow {
     from {
-      box-shadow: 0 0 10px hsl(var(--neon-cyan) / 0.3);
+      box-shadow: 0 0 10px hsl(var(--neon-pink) / 0.3);
     }
     to {
-      box-shadow: 0 0 20px hsl(var(--neon-cyan) / 0.5), 0 0 30px hsl(var(--neon-cyan) / 0.3);
+      box-shadow: 0 0 20px hsl(var(--neon-pink) / 0.5), 0 0 30px hsl(var(--neon-pink) / 0.3);
     }
   }
 

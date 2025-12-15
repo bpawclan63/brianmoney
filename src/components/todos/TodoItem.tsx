@@ -1,7 +1,8 @@
-import { Circle, CheckCircle2, Trash2, Clock, GripVertical } from 'lucide-react';
+import { Circle, CheckCircle2, Trash2, Clock } from 'lucide-react';
 import { Todo } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useConfetti } from '@/hooks/useConfetti';
 
 interface TodoItemProps {
   todo: Todo;
@@ -10,9 +11,9 @@ interface TodoItemProps {
 }
 
 const priorityStyles = {
-  high: 'border-l-red-500 bg-red-500/5',
-  medium: 'border-l-amber-500 bg-amber-500/5',
-  low: 'border-l-emerald-500 bg-emerald-500/5',
+  high: 'border-l-rose-400 bg-rose-500/5',
+  medium: 'border-l-amber-400 bg-amber-500/5',
+  low: 'border-l-emerald-400 bg-emerald-500/5',
 };
 
 const priorityBadgeStyles = {
@@ -22,25 +23,34 @@ const priorityBadgeStyles = {
 };
 
 export function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
+  const { fireHearts } = useConfetti();
   const isOverdue =
     todo.dueDate && new Date(todo.dueDate) < new Date() && todo.status === 'active';
+
+  const handleToggle = () => {
+    // Fire confetti when completing a todo (not when uncompleting)
+    if (todo.status === 'active') {
+      fireHearts();
+    }
+    onToggle(todo.id);
+  };
 
   return (
     <div
       className={cn(
-        'flex items-start gap-4 p-4 rounded-xl border-l-4 transition-all duration-200',
+        'flex items-start gap-4 p-4 rounded-2xl border-l-4 transition-all duration-200 group',
         'glass-card hover:border-primary/30',
         priorityStyles[todo.priority],
         todo.status === 'done' && 'opacity-60'
       )}
     >
       <button
-        onClick={() => onToggle(todo.id)}
+        onClick={handleToggle}
         className={cn(
-          'mt-0.5 transition-colors',
+          'mt-0.5 transition-all duration-300',
           todo.status === 'done'
-            ? 'text-neon-cyan'
-            : 'text-muted-foreground hover:text-primary'
+            ? 'text-primary scale-110'
+            : 'text-muted-foreground hover:text-primary hover:scale-110'
         )}
       >
         {todo.status === 'done' ? (
@@ -71,13 +81,14 @@ export function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
               priorityBadgeStyles[todo.priority]
             )}
           >
+            {todo.priority === 'high' ? '🔥 ' : todo.priority === 'medium' ? '⭐ ' : '💫 '}
             {todo.priority}
           </span>
           {todo.dueDate && (
             <span
               className={cn(
                 'text-xs flex items-center gap-1',
-                isOverdue ? 'text-red-400' : 'text-muted-foreground'
+                isOverdue ? 'text-rose-400' : 'text-muted-foreground'
               )}
             >
               <Clock className="w-3 h-3" />

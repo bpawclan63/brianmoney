@@ -4,6 +4,7 @@ import { Transaction, Category } from '@/types';
 import { formatCurrency, formatDateShort } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { getEmojiForCategory, iconToEmoji } from '@/lib/categoryEmojis';
 
 interface RecentTransactionsProps {
   transactions: Transaction[];
@@ -38,20 +39,23 @@ export function RecentTransactions({ transactions, categories, currency }: Recen
         <div className="space-y-3">
           {recentTransactions.map((transaction) => {
             const category = getCategory(transaction.categoryId);
+            const emoji = category?.icon 
+              ? (iconToEmoji[category.icon] || getEmojiForCategory(category.name))
+              : (transaction.type === 'income' ? '💰' : '💸');
             return (
               <div
                 key={transaction.id}
-                className="flex items-center gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-4 p-3 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-colors"
               >
                 <div
                   className={cn(
                     'w-10 h-10 rounded-xl flex items-center justify-center text-lg',
                     transaction.type === 'income'
                       ? 'bg-emerald-500/20'
-                      : 'bg-red-500/20'
+                      : 'bg-rose-500/20'
                   )}
                 >
-                  {category?.icon || (transaction.type === 'income' ? '💰' : '💸')}
+                  {emoji}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
@@ -67,7 +71,7 @@ export function RecentTransactions({ transactions, categories, currency }: Recen
                       'text-sm font-semibold flex items-center gap-1',
                       transaction.type === 'income'
                         ? 'text-emerald-400'
-                        : 'text-red-400'
+                        : 'text-rose-400'
                     )}
                   >
                     {transaction.type === 'income' ? (

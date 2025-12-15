@@ -8,9 +8,10 @@ import { formatCurrency } from '@/lib/data';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
+import { useConfetti } from '@/hooks/useConfetti';
 
-const goalIcons = ['🎯', '🏠', '🚗', '✈️', '💻', '📚', '💍', '🏖️', '💰', '🎓'];
-const goalColors = ['#06b6d4', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
+const goalIcons = ['🎯', '🏠', '🚗', '✈️', '💻', '📚', '💍', '🏖️', '💰', '🎓', '👗', '💄', '☕', '🧋', '💕'];
+const goalColors = ['#f472b6', '#c084fc', '#a78bfa', '#06b6d4', '#10b981', '#f59e0b', '#fb7185'];
 
 export default function Goals() {
   const { goals, loading, addGoal, updateGoal, deleteGoal } = useDbGoals();
@@ -60,6 +61,8 @@ export default function Goals() {
     setSubmitting(false);
   };
 
+  const { fireCelebration } = useConfetti();
+
   const handleAddFunds = async (goalId: string) => {
     if (!fundAmount || parseFloat(fundAmount) <= 0) return;
 
@@ -75,9 +78,11 @@ export default function Goals() {
     });
 
     if (isComplete) {
+      // Fire celebration confetti when goal is achieved!
+      fireCelebration();
       toast({
         title: '🎉 Goal achieved!',
-        description: `Congratulations! You've reached your ${goal.name} goal!`,
+        description: `Congratulations! You've reached your ${goal.name} goal! 💕`,
       });
     }
 
