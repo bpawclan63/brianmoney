@@ -16,6 +16,8 @@ import Recurring from "./pages/Recurring";
 import Settings from "./pages/Settings";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
+import AdminAuth from "./pages/AdminAuth";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -43,6 +45,15 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/auth" element={<Auth />} />
+      <Route path="/admin-login" element={<AdminAuth />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        }
+      />
       <Route
         element={
           <ProtectedRoute>
