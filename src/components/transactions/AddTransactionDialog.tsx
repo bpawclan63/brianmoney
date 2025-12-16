@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Plus, CalendarDays } from 'lucide-react';
+import { CategoryIcon } from '@/components/CategoryIcon';
 import { Transaction, TransactionType, PaymentMethod, Category } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -113,14 +114,14 @@ export function AddTransactionDialog({ isOpen, onClose, onAdd, categories }: Add
                   type="button"
                   onClick={() => setCategoryId(cat.id)}
                   className={cn(
-                    'p-3 rounded-lg text-2xl transition-all border',
+                    'p-3 rounded-lg text-2xl transition-all border flex items-center justify-center',
                     categoryId === cat.id
                       ? 'bg-primary/20 border-primary/50'
                       : 'bg-muted/30 border-transparent hover:bg-muted/50'
                   )}
                   title={cat.name}
                 >
-                  {cat.icon}
+                  <CategoryIcon iconName={cat.icon} className="w-6 h-6" />
                 </button>
               ))}
             </div>

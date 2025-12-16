@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Plus, Repeat, CalendarDays, X, Loader2, Pause, Play, TrendingUp, TrendingDown } from 'lucide-react';
+import { CategoryIcon } from '@/components/CategoryIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +21,7 @@ export default function Recurring() {
   const { categories } = useDbCategories();
   const { profile } = useDbProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+
   // Form state
   const [name, setName] = useState('');
   const [type, setType] = useState<'income' | 'expense'>('expense');
@@ -170,7 +171,11 @@ export default function Recurring() {
                       item.type === 'income' ? 'bg-success/20' : 'bg-destructive/20'
                     )}
                   >
-                    {category?.icon || (item.type === 'income' ? '💰' : '💸')}
+                    {category?.icon ? (
+                      <CategoryIcon iconName={category.icon} className="w-6 h-6" />
+                    ) : (
+                      item.type === 'income' ? '💰' : '💸'
+                    )}
                   </div>
 
                   {/* Info */}
@@ -321,7 +326,7 @@ export default function Recurring() {
                       )}
                       title={cat.name}
                     >
-                      {cat.icon}
+                      <CategoryIcon iconName={cat.icon} className="w-6 h-6" />
                     </button>
                   ))}
                 </div>

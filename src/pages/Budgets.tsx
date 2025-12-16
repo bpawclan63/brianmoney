@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Plus, PiggyBank, AlertTriangle, CheckCircle, Loader2, X } from 'lucide-react';
+import { CategoryIcon } from '@/components/CategoryIcon';
 import { Button } from '@/components/ui/button';
 import { BudgetCard } from '@/components/budgets/BudgetCard';
 import { useDbBudgets, useDbCategories, useDbProfile, useDbTransactions } from '@/hooks/useSupabaseStore';
@@ -46,12 +47,12 @@ export default function Budgets() {
       const spent = monthlyExpenses
         .filter((t) => t.category_id === budget.category_id)
         .reduce((sum, t) => sum + Number(t.amount), 0);
-      return { 
+      return {
         id: budget.id,
         categoryId: budget.category_id,
         amount: Number(budget.amount),
         month: budget.month,
-        spent 
+        spent
       };
     });
   }, [currentMonthBudgets, transactions, currentMonth]);
@@ -207,7 +208,7 @@ export default function Budgets() {
                       )}
                       title={cat.name}
                     >
-                      {cat.icon}
+                      <CategoryIcon iconName={cat.icon} className="w-6 h-6" />
                     </button>
                   ))}
                 </div>

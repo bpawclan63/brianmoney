@@ -107,7 +107,7 @@ export function useDbTransactions() {
 
   const fetchTransactions = useCallback(async () => {
     if (!user) return;
-    
+
     const { data, error } = await supabase
       .from('transactions')
       .select('*')
@@ -211,6 +211,7 @@ export function useDbCategories() {
     return data;
   }, [user]);
 
+  console.log(categories)
   return { categories, loading, addCategory, refetch: fetchCategories };
 }
 

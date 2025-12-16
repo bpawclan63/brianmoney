@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowUpRight, ArrowDownRight, Trash2, Search, Filter } from 'lucide-react';
+import { CategoryIcon } from '@/components/CategoryIcon';
 import { Transaction, Category, TransactionType } from '@/types';
 import { formatCurrency, formatDate } from '@/lib/data';
 import { cn } from '@/lib/utils';
@@ -73,7 +74,7 @@ export function TransactionList({ transactions, categories, currency, onDelete }
               <option value="all">All Categories</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
-                  {cat.icon} {cat.name}
+                  {(iconToEmoji[cat.icon] || '✨')} {cat.name}
                 </option>
               ))}
             </select>
@@ -98,7 +99,7 @@ export function TransactionList({ transactions, categories, currency, onDelete }
                 {dayTransactions.map((transaction) => {
                   const category = getCategory(transaction.categoryId);
                   // Get emoji from category icon or name
-                  const emoji = category?.icon 
+                  const emoji = category?.icon
                     ? (iconToEmoji[category.icon] || getEmojiForCategory(category.name))
                     : '💸';
                   return (
@@ -114,7 +115,11 @@ export function TransactionList({ transactions, categories, currency, onDelete }
                             : 'bg-rose-500/20'
                         )}
                       >
-                        {emoji}
+                        {category?.icon ? (
+                          <CategoryIcon iconName={category.icon} className="w-6 h-6" />
+                        ) : (
+                          emoji
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-foreground">
