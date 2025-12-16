@@ -33,6 +33,17 @@ interface AdminStats {
   adminCount: number;
 }
 
+interface ActivityLog {
+  id: string;
+  admin_id: string;
+  action: string;
+  target_user_id: string | null;
+  details: string | null;
+  created_at: string;
+  admin_email?: string;
+  target_email?: string;
+}
+
 export function useIsAdmin() {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
@@ -132,7 +143,17 @@ export function useAdminStats() {
   return { stats, loading };
 }
 
+async function logAdminActivity(adminId: string, action: string, targetUserId: string | null, details?: string) {
+  await supabase.from('admin_activity_logs').insert({
+    admin_id: adminId,
+    action,
+    target_user_id: targetUserId,
+    details,
+  });
+}
+
 export function useAdminUsers() {
+  const { user } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -163,7 +184,7 @@ export function useAdminUsers() {
     setLoading(false);
   };
 
-  const deleteUser = async (userId: string) => {
+  const deleteUser = async (userId: string, userEmail: string) => {
     const { error } = await supabase
       .from('profiles')
       .delete()
@@ -179,6 +200,10 @@ export function useAdminUsers() {
       return false;
     }
 
+    if (user) {
+      await logAdminActivity(user.id, 'delete_user', userId, `Deleted user: ${userEmail}`);
+    }
+
     toast({
       title: 'Success',
       description: 'User deleted successfully',
@@ -187,7 +212,7 @@ export function useAdminUsers() {
     return true;
   };
 
-  const toggleUserActive = async (userId: string, isActive: boolean) => {
+  const toggleUserActive = async (userId: string, isActive: boolean, userEmail: string) => {
     const { error } = await supabase
       .from('profiles')
       .update({ is_active: isActive })
@@ -203,6 +228,15 @@ export function useAdminUsers() {
       return false;
     }
 
+    if (user) {
+      await logAdminActivity(
+        user.id, 
+        isActive ? 'activate_user' : 'deactivate_user', 
+        userId, 
+        `${isActive ? 'Activated' : 'Deactivated'} user: ${userEmail}`
+      );
+    }
+
     toast({
       title: 'Success',
       description: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
@@ -211,7 +245,7 @@ export function useAdminUsers() {
     return true;
   };
 
-  const toggleAdminRole = async (userId: string, makeAdmin: boolean) => {
+  const toggleAdminRole = async (userId: string, makeAdmin: boolean, userEmail: string) => {
     if (makeAdmin) {
       const { error } = await supabase
         .from('user_roles')
@@ -244,6 +278,15 @@ export function useAdminUsers() {
       }
     }
 
+    if (user) {
+      await logAdminActivity(
+        user.id, 
+        makeAdmin ? 'promote_admin' : 'demote_admin', 
+        userId, 
+        `${makeAdmin ? 'Promoted to admin' : 'Removed admin role'}: ${userEmail}`
+      );
+    }
+
     toast({
       title: 'Success',
       description: makeAdmin ? 'User promoted to admin' : 'Admin role removed',
@@ -252,11 +295,36 @@ export function useAdminUsers() {
     return true;
   };
 
+  const resetPassword = async (userId: string, email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth?type=recovery`,
+    });
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    if (user) {
+      await logAdminActivity(user.id, 'reset_password', userId, `Sent password reset to: ${email}`);
+    }
+
+    toast({
+      title: 'Success',
+      description: `Password reset email sent to ${email}`,
+    });
+    return true;
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  return { users, loading, refetch: fetchUsers, deleteUser, toggleUserActive, toggleAdminRole };
+  return { users, loading, refetch: fetchUsers, deleteUser, toggleUserActive, toggleAdminRole, resetPassword };
 }
 
 export function useUserTransactions(userId: string | null) {
@@ -290,4 +358,42 @@ export function useUserTransactions(userId: string | null) {
   }, [userId]);
 
   return { transactions, loading };
+}
+
+export function useAdminActivityLogs() {
+  const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchLogs = async () => {
+    setLoading(true);
+    
+    // Fetch logs and profiles in parallel
+    const [logsRes, profilesRes] = await Promise.all([
+      supabase
+        .from('admin_activity_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50),
+      supabase.from('profiles').select('id, email'),
+    ]);
+
+    if (logsRes.error) {
+      console.error('Error fetching logs:', logsRes.error);
+    } else {
+      const profileMap = new Map((profilesRes.data || []).map(p => [p.id, p.email]));
+      const logsWithEmails = (logsRes.data || []).map(log => ({
+        ...log,
+        admin_email: profileMap.get(log.admin_id) || 'Unknown',
+        target_email: log.target_user_id ? profileMap.get(log.target_user_id) : null,
+      }));
+      setLogs(logsWithEmails);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  return { logs, loading, refetch: fetchLogs };
 }
