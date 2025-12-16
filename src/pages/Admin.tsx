@@ -17,6 +17,7 @@ import {
   Wallet,
   Target,
   Activity,
+  History,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,21 +47,31 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { useIsAdmin, useAdminUsers, useUserTransactions, useAdminStats } from '@/hooks/useAdmin';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsAdmin, useAdminUsers, useUserTransactions, useAdminStats, useAdminActivityLogs } from '@/hooks/useAdmin';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+
+const actionLabels: Record<string, { label: string; color: string }> = {
+  delete_user: { label: 'Hapus User', color: 'text-red-500' },
+  activate_user: { label: 'Aktifkan User', color: 'text-green-500' },
+  deactivate_user: { label: 'Nonaktifkan User', color: 'text-amber-500' },
+  promote_admin: { label: 'Promosi Admin', color: 'text-purple-500' },
+  demote_admin: { label: 'Hapus Admin', color: 'text-orange-500' },
+  reset_password: { label: 'Reset Password', color: 'text-blue-500' },
+};
 
 export default function Admin() {
   const { user } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
-  const { users, loading: usersLoading, deleteUser, toggleUserActive, toggleAdminRole } = useAdminUsers();
+  const { users, loading: usersLoading, deleteUser, toggleUserActive, toggleAdminRole, resetPassword } = useAdminUsers();
   const { stats, loading: statsLoading } = useAdminStats();
+  const { logs, loading: logsLoading, refetch: refetchLogs } = useAdminActivityLogs();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showTransactions, setShowTransactions] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [deleteUserEmail, setDeleteUserEmail] = useState<string>('');
   const [resettingPassword, setResettingPassword] = useState<string | null>(null);
   const [togglingActive, setTogglingActive] = useState<string | null>(null);
   const [togglingAdmin, setTogglingAdmin] = useState<string | null>(null);
@@ -83,26 +94,9 @@ export default function Admin() {
 
   const handleResetPassword = async (email: string, userId: string) => {
     setResettingPassword(userId);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?type=recovery`,
-      });
-
-      if (error) {
-        toast({
-          title: 'Error',
-          description: error.message,
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'Success',
-          description: `Password reset email sent to ${email}`,
-        });
-      }
-    } finally {
-      setResettingPassword(null);
-    }
+    await resetPassword(userId, email);
+    refetchLogs();
+    setResettingPassword(null);
   };
 
   const handleViewTransactions = (userId: string) => {
@@ -112,20 +106,24 @@ export default function Admin() {
 
   const handleDeleteConfirm = async () => {
     if (deleteUserId) {
-      await deleteUser(deleteUserId);
+      await deleteUser(deleteUserId, deleteUserEmail);
+      refetchLogs();
       setDeleteUserId(null);
+      setDeleteUserEmail('');
     }
   };
 
-  const handleToggleActive = async (userId: string, currentStatus: boolean | null) => {
+  const handleToggleActive = async (userId: string, currentStatus: boolean | null, email: string) => {
     setTogglingActive(userId);
-    await toggleUserActive(userId, currentStatus === false);
+    await toggleUserActive(userId, currentStatus === false, email);
+    refetchLogs();
     setTogglingActive(null);
   };
 
-  const handleToggleAdmin = async (userId: string, isCurrentlyAdmin: boolean) => {
+  const handleToggleAdmin = async (userId: string, isCurrentlyAdmin: boolean, email: string) => {
     setTogglingAdmin(userId);
-    await toggleAdminRole(userId, !isCurrentlyAdmin);
+    await toggleAdminRole(userId, !isCurrentlyAdmin, email);
+    refetchLogs();
     setTogglingAdmin(null);
   };
 
@@ -192,135 +190,189 @@ export default function Admin() {
           )}
         </div>
 
-        {/* Users Table */}
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              User Accounts
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {usersLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            ) : users.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No users found</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Joined</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((userItem) => (
-                      <TableRow key={userItem.id} className={cn(userItem.is_active === false && 'opacity-50')}>
-                        <TableCell className="font-medium">
-                          {userItem.name || 'No name'}
-                          {userItem.id === user?.id && (
-                            <span className="ml-2 text-xs text-primary">(You)</span>
-                          )}
-                        </TableCell>
-                        <TableCell>{userItem.email}</TableCell>
-                        <TableCell>
-                          <Badge variant={userItem.is_active !== false ? 'default' : 'secondary'}>
-                            {userItem.is_active !== false ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={userItem.is_admin ? 'destructive' : 'outline'}>
-                            {userItem.is_admin ? 'Admin' : 'User'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {userItem.created_at 
-                            ? format(new Date(userItem.created_at), 'dd MMM yyyy')
-                            : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleViewTransactions(userItem.id)}
-                              title="View Transactions"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleResetPassword(userItem.email, userItem.id)}
-                              disabled={resettingPassword === userItem.id}
-                              title="Reset Password"
-                            >
-                              {resettingPassword === userItem.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <KeyRound className="w-4 h-4" />
-                              )}
-                            </Button>
-                            {userItem.id !== user?.id && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleToggleActive(userItem.id, userItem.is_active)}
-                                  disabled={togglingActive === userItem.id}
-                                  title={userItem.is_active !== false ? 'Deactivate User' : 'Activate User'}
-                                >
-                                  {togglingActive === userItem.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : userItem.is_active !== false ? (
-                                    <UserX className="w-4 h-4 text-amber-500" />
-                                  ) : (
-                                    <UserCheck className="w-4 h-4 text-green-500" />
-                                  )}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleToggleAdmin(userItem.id, !!userItem.is_admin)}
-                                  disabled={togglingAdmin === userItem.id}
-                                  title={userItem.is_admin ? 'Remove Admin' : 'Promote to Admin'}
-                                >
-                                  {togglingAdmin === userItem.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : userItem.is_admin ? (
-                                    <ShieldOff className="w-4 h-4 text-amber-500" />
-                                  ) : (
-                                    <ShieldCheck className="w-4 h-4 text-purple-500" />
-                                  )}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => setDeleteUserId(userItem.id)}
-                                  className="text-destructive hover:text-destructive"
-                                  title="Delete User"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </TableCell>
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Users Table */}
+          <Card className="glass-card lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                User Accounts
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {usersLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : users.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No users found</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {users.map((userItem) => (
+                        <TableRow key={userItem.id} className={cn(userItem.is_active === false && 'opacity-50')}>
+                          <TableCell className="font-medium">
+                            {userItem.name || 'No name'}
+                            {userItem.id === user?.id && (
+                              <span className="ml-2 text-xs text-primary">(You)</span>
+                            )}
+                          </TableCell>
+                          <TableCell>{userItem.email}</TableCell>
+                          <TableCell>
+                            <Badge variant={userItem.is_active !== false ? 'default' : 'secondary'}>
+                              {userItem.is_active !== false ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={userItem.is_admin ? 'destructive' : 'outline'}>
+                              {userItem.is_admin ? 'Admin' : 'User'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {userItem.created_at 
+                              ? format(new Date(userItem.created_at), 'dd MMM yyyy')
+                              : '-'}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleViewTransactions(userItem.id)}
+                                title="View Transactions"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleResetPassword(userItem.email, userItem.id)}
+                                disabled={resettingPassword === userItem.id}
+                                title="Reset Password"
+                              >
+                                {resettingPassword === userItem.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <KeyRound className="w-4 h-4" />
+                                )}
+                              </Button>
+                              {userItem.id !== user?.id && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleToggleActive(userItem.id, userItem.is_active, userItem.email)}
+                                    disabled={togglingActive === userItem.id}
+                                    title={userItem.is_active !== false ? 'Deactivate User' : 'Activate User'}
+                                  >
+                                    {togglingActive === userItem.id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : userItem.is_active !== false ? (
+                                      <UserX className="w-4 h-4 text-amber-500" />
+                                    ) : (
+                                      <UserCheck className="w-4 h-4 text-green-500" />
+                                    )}
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleToggleAdmin(userItem.id, !!userItem.is_admin, userItem.email)}
+                                    disabled={togglingAdmin === userItem.id}
+                                    title={userItem.is_admin ? 'Remove Admin' : 'Promote to Admin'}
+                                  >
+                                    {togglingAdmin === userItem.id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : userItem.is_admin ? (
+                                      <ShieldOff className="w-4 h-4 text-amber-500" />
+                                    ) : (
+                                      <ShieldCheck className="w-4 h-4 text-purple-500" />
+                                    )}
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                      setDeleteUserId(userItem.id);
+                                      setDeleteUserEmail(userItem.email);
+                                    }}
+                                    className="text-destructive hover:text-destructive"
+                                    title="Delete User"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Activity Logs */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Activity Log
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {logsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : logs.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No activity yet</p>
+              ) : (
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="space-y-3">
+                    {logs.map((log) => {
+                      const actionInfo = actionLabels[log.action] || { label: log.action, color: 'text-muted-foreground' };
+                      return (
+                        <div key={log.id} className="border-b border-border/50 pb-3 last:border-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="space-y-1">
+                              <p className={cn("text-sm font-medium", actionInfo.color)}>
+                                {actionInfo.label}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                by {log.admin_email}
+                              </p>
+                              {log.details && (
+                                <p className="text-xs text-muted-foreground/80">
+                                  {log.details}
+                                </p>
+                              )}
+                            </div>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {format(new Date(log.created_at), 'dd MMM HH:mm')}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Transactions Dialog */}
