@@ -216,6 +216,7 @@ export default function Admin() {
                         <TableHead>Status</TableHead>
                         <TableHead>Role</TableHead>
                         <TableHead>Joined</TableHead>
+                        <TableHead>Subscription</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -243,6 +244,23 @@ export default function Admin() {
                             {userItem.created_at 
                               ? format(new Date(userItem.created_at), 'dd MMM yyyy')
                               : '-'}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-xs space-y-1">
+                              {userItem.is_active !== false ? (
+                                <span className="text-green-500">
+                                  Aktif: {userItem.activated_at 
+                                    ? format(new Date(userItem.activated_at), 'dd MMM yyyy')
+                                    : format(new Date(userItem.created_at || ''), 'dd MMM yyyy')}
+                                </span>
+                              ) : (
+                                <span className="text-red-500">
+                                  Expired: {userItem.deactivated_at 
+                                    ? format(new Date(userItem.deactivated_at), 'dd MMM yyyy')
+                                    : '-'}
+                                </span>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center justify-end gap-1">

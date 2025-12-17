@@ -183,8 +183,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          activated_at: string | null
           created_at: string | null
           currency: string | null
+          deactivated_at: string | null
           email: string
           id: string
           initial_balance: number | null
@@ -193,8 +195,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          activated_at?: string | null
           created_at?: string | null
           currency?: string | null
+          deactivated_at?: string | null
           email: string
           id: string
           initial_balance?: number | null
@@ -203,8 +207,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          activated_at?: string | null
           created_at?: string | null
           currency?: string | null
+          deactivated_at?: string | null
           email?: string
           id?: string
           initial_balance?: number | null
