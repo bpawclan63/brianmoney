@@ -13,9 +13,11 @@ import {
   Target,
   Repeat,
   LogOut,
+  Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsAdmin } from '@/hooks/useAdmin';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -40,6 +42,7 @@ const bottomNavItems = [
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const location = useLocation();
   const { signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
 
   return (
     <>
@@ -128,6 +131,35 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
         {/* Bottom navigation */}
         <div className="py-4 px-3 space-y-2 border-t border-sidebar-border">
+          {/* Admin Link */}
+          {isAdmin && (
+            <NavLink
+              to="/admin"
+              className={cn(
+                'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200',
+                'hover:bg-sidebar-accent group',
+                location.pathname === '/admin'
+                  ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400'
+                  : 'text-purple-400/70 hover:text-purple-400'
+              )}
+            >
+              <Shield
+                className={cn(
+                  'w-5 h-5 flex-shrink-0 transition-all',
+                  location.pathname === '/admin' ? 'text-purple-400' : 'group-hover:text-purple-400'
+                )}
+              />
+              <span
+                className={cn(
+                  'font-medium whitespace-nowrap transition-opacity duration-200',
+                  isOpen ? 'opacity-100' : 'opacity-0 lg:hidden'
+                )}
+              >
+                Admin Panel
+              </span>
+            </NavLink>
+          )}
+          
           {bottomNavItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (

@@ -10,6 +10,8 @@ interface UserProfile {
   currency: string | null;
   created_at: string | null;
   is_active: boolean | null;
+  activated_at: string | null;
+  deactivated_at: string | null;
   is_admin?: boolean;
 }
 
@@ -213,9 +215,13 @@ export function useAdminUsers() {
   };
 
   const toggleUserActive = async (userId: string, isActive: boolean, userEmail: string) => {
+    const updateData = isActive 
+      ? { is_active: true, activated_at: new Date().toISOString(), deactivated_at: null }
+      : { is_active: false, deactivated_at: new Date().toISOString() };
+
     const { error } = await supabase
       .from('profiles')
-      .update({ is_active: isActive })
+      .update(updateData)
       .eq('id', userId);
 
     if (error) {
