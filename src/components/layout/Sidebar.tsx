@@ -26,8 +26,8 @@ interface SidebarProps {
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { path: '/budgets', label: 'Budgets', icon: PiggyBank },
+  { path: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { path: '/goals', label: 'Goals', icon: Target },
   { path: '/recurring', label: 'Recurring', icon: Repeat },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },

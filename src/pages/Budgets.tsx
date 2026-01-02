@@ -194,21 +194,21 @@ export default function Budgets() {
             <form onSubmit={handleAddBudget} className="space-y-5">
               <div>
                 <Label className="text-muted-foreground">Category</Label>
-                <div className="grid grid-cols-4 gap-2 mt-1.5">
-                  {availableCategories.slice(0, 8).map((cat) => (
+                <div className="grid grid-cols-2 gap-2 mt-1.5 max-h-48 overflow-y-auto">
+                  {availableCategories.map((cat) => (
                     <button
                       key={cat.id}
                       type="button"
                       onClick={() => setSelectedCategory(cat.id)}
                       className={cn(
-                        'p-3 rounded-lg text-2xl transition-all border',
+                        'p-3 rounded-lg transition-all border flex items-center gap-2',
                         selectedCategory === cat.id
                           ? 'bg-primary/20 border-primary/50'
                           : 'bg-muted/30 border-transparent hover:bg-muted/50'
                       )}
-                      title={cat.name}
                     >
-                      <CategoryIcon iconName={cat.icon} className="w-6 h-6" />
+                      <CategoryIcon iconName={cat.icon} className="w-5 h-5 flex-shrink-0" />
+                      <span className="text-sm truncate">{cat.name}</span>
                     </button>
                   ))}
                 </div>
@@ -222,7 +222,7 @@ export default function Budgets() {
                   value={budgetAmount}
                   onChange={(e) => setBudgetAmount(e.target.value)}
                   min="0"
-                  step="100000"
+                  step="1"
                   className="mt-1.5 text-lg font-semibold"
                   required
                 />

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { MainLayout } from "./components/layout/MainLayout";
+import { useUserActivation } from "./hooks/useUserActivation";
 import Index from "./pages/Index";
 import Transactions from "./pages/Transactions";
 import Budgets from "./pages/Budgets";
@@ -18,15 +19,19 @@ import About from "./pages/About";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import AdminAuth from "./pages/AdminAuth";
+import PendingActivation from "./pages/PendingActivation";
+import Terms from "./pages/Terms";
+import Guide from "./pages/Guide";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { isActivated, loading: activationLoading } = useUserActivation();
 
-  if (loading) {
+  if (authLoading || activationLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -38,6 +43,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/auth" replace />;
   }
 
+  // Check if user is activated
+  if (isActivated === false) {
+    return <PendingActivation />;
+  }
+
   return <>{children}</>;
 }
 
@@ -46,6 +56,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/auth" element={<Auth />} />
       <Route path="/admin-login" element={<AdminAuth />} />
+      <Route path="/terms" element={<Terms />} />
       <Route
         path="/admin"
         element={
@@ -70,6 +81,7 @@ function AppRoutes() {
         <Route path="/recurring" element={<Recurring />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/about" element={<About />} />
+        <Route path="/guide" element={<Guide />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
