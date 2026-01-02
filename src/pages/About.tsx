@@ -1,5 +1,7 @@
-import { Sparkles, BarChart3, CheckSquare, PiggyBank, Heart, Shield, Zap } from 'lucide-react';
+import { Sparkles, BarChart3, CheckSquare, PiggyBank, Heart, Shield, Zap, Instagram, MessageCircle, BookOpen, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const features = [
   {
@@ -134,6 +136,66 @@ export default function About() {
               Performa optimal dengan update instan dan desain responsif.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Quick Links */}
+      <div className="glass-card p-8">
+        <h2 className="text-2xl font-bold text-foreground text-center mb-8">Link Cepat 🔗</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Link to="/guide" className="glass-card-hover p-4 flex items-center gap-4 group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center">
+              <BookOpen className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Panduan Penggunaan</h3>
+              <p className="text-sm text-muted-foreground">Pelajari cara menggunakan Flowly</p>
+            </div>
+          </Link>
+          <Link to="/terms" className="glass-card-hover p-4 flex items-center gap-4 group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Syarat & Ketentuan</h3>
+              <p className="text-sm text-muted-foreground">Baca syarat penggunaan aplikasi</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      {/* Contact & Social */}
+      <div className="glass-card p-8">
+        <h2 className="text-2xl font-bold text-foreground text-center mb-8">Hubungi Kami 📱</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <a 
+            href="https://instagram.com/flowly.app" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="glass-card-hover p-6 flex items-center gap-4 group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center">
+              <Instagram className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Instagram</h3>
+              <p className="text-sm text-muted-foreground">@flowly.app</p>
+            </div>
+          </a>
+          <a 
+            href="https://wa.me/6281234567890" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="glass-card-hover p-6 flex items-center gap-4 group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+              <MessageCircle className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Customer Service</h3>
+              <p className="text-sm text-muted-foreground">+62 812-3456-7890</p>
+            </div>
+          </a>
         </div>
       </div>
 

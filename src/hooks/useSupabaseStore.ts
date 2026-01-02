@@ -159,7 +159,25 @@ export function useDbTransactions() {
     return true;
   }, []);
 
-  return { transactions, loading, addTransaction, deleteTransaction, refetch: fetchTransactions };
+  const updateTransaction = useCallback(async (id: string, updates: Partial<Omit<DbTransaction, 'id' | 'user_id' | 'created_at'>>) => {
+    const { error } = await supabase
+      .from('transactions')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      toast({ title: 'Error updating transaction', description: error.message, variant: 'destructive' });
+      return false;
+    }
+
+    setTransactions((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
+    );
+    toast({ title: 'Transaction updated' });
+    return true;
+  }, []);
+
+  return { transactions, loading, addTransaction, deleteTransaction, updateTransaction, refetch: fetchTransactions };
 }
 
 // Categories Hook
@@ -274,7 +292,25 @@ export function useDbBudgets() {
     return true;
   }, []);
 
-  return { budgets, loading, addBudget, deleteBudget, refetch: fetchBudgets };
+  const updateBudget = useCallback(async (id: string, updates: Partial<Omit<DbBudget, 'id' | 'user_id' | 'created_at'>>) => {
+    const { error } = await supabase
+      .from('budgets')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      toast({ title: 'Error updating budget', description: error.message, variant: 'destructive' });
+      return false;
+    }
+
+    setBudgets((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, ...updates } : b))
+    );
+    toast({ title: 'Budget updated' });
+    return true;
+  }, []);
+
+  return { budgets, loading, addBudget, deleteBudget, updateBudget, refetch: fetchBudgets };
 }
 
 // Todos Hook
