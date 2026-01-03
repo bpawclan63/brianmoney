@@ -1,16 +1,19 @@
 import { Budget, Category } from '@/types';
 import { formatCurrency } from '@/lib/data';
 import { cn } from '@/lib/utils';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Pencil, Trash2 } from 'lucide-react';
 import { getEmojiForCategory, iconToEmoji } from '@/lib/categoryEmojis';
+import { Button } from '@/components/ui/button';
 
 interface BudgetCardProps {
   budget: Budget;
   category: Category | undefined;
   currency: string;
+  onEdit?: (budget: Budget) => void;
+  onDelete?: (budgetId: string) => void;
 }
 
-export function BudgetCard({ budget, category, currency }: BudgetCardProps) {
+export function BudgetCard({ budget, category, currency, onEdit, onDelete }: BudgetCardProps) {
   const percentage = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
   const remaining = budget.amount - budget.spent;
   const isOverBudget = percentage > 100;
@@ -50,11 +53,33 @@ export function BudgetCard({ budget, category, currency }: BudgetCardProps) {
             <p className={cn('text-sm', getStatusColor())}>{getStatusText()}</p>
           </div>
         </div>
-        {isOverBudget && (
-          <div className="p-2 rounded-lg bg-rose-500/20">
-            <AlertTriangle className="w-5 h-5 text-rose-400" />
-          </div>
-        )}
+        <div className="flex items-center gap-1">
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-primary"
+              onClick={() => onEdit(budget)}
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              onClick={() => onDelete(budget.id)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
+          {isOverBudget && (
+            <div className="p-2 rounded-lg bg-rose-500/20">
+              <AlertTriangle className="w-5 h-5 text-rose-400" />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Progress bar */}

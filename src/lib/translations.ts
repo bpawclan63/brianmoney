@@ -17,6 +17,7 @@ export const translations = {
     noData: { id: 'Tidak ada data', en: 'No data' },
     of: { id: 'dari', en: 'of' },
     categories: { id: 'kategori', en: 'categories' },
+    category: { id: 'Kategori', en: 'Category' },
   },
 
   // Navigation
