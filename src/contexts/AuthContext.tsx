@@ -11,6 +11,8 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
   updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
+  subscriptionStatus: 'active' | 'inactive' | 'loading';
+  checkSubscription: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,30 +21,86 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<'active' | 'inactive' | 'loading'>('loading');
+
+  const checkSubscription = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        setSubscriptionStatus('inactive');
+        return;
+      }
+
+      console.log('Checking subscription for user:', session.user.id);
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .select('status')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking subscription:', error);
+        setSubscriptionStatus('inactive');
+      } else {
+        console.log('Subscription status found:', data?.status);
+        setSubscriptionStatus((data?.status as 'active' | 'inactive') ?? 'inactive');
+      }
+    } catch (err) {
+      console.error('Unexpected error in checkSubscription:', err);
+      setSubscriptionStatus('inactive');
+    }
+  };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted) return;
+
         setSession(session);
         setUser(session?.user ?? null);
+
+        if (session?.user) {
+          await checkSubscription();
+        } else {
+          setSubscriptionStatus('inactive');
+        }
+      } catch (err) {
+        console.error('Error during auth initialization:', err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          await checkSubscription();
+        } else {
+          setSubscriptionStatus('inactive');
+        }
         setLoading(false);
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, name?: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -51,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: { name }
       }
     });
-    
+
     return { error: error as Error | null };
   };
 
@@ -60,21 +118,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password
     });
-    
+
     return { error: error as Error | null };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    console.log('signOut: Initiating logout...');
+    // Force clear local state FIRST to ensure UI updates immediately
+    setSession(null);
+    setUser(null);
+    setSubscriptionStatus('inactive');
+    setLoading(false);
+
+    try {
+      console.log('signOut: Calling supabase.auth.signOut()...');
+      await supabase.auth.signOut();
+      console.log('signOut: Supabase logout successful');
+    } catch (err) {
+      console.error('signOut: Error during supabase sign out:', err);
+    }
   };
 
   const resetPassword = async (email: string) => {
     const redirectUrl = `${window.location.origin}/auth?type=recovery`;
-    
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
     });
-    
+
     return { error: error as Error | null };
   };
 
@@ -82,12 +153,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
-    
+
     return { error: error as Error | null };
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, resetPassword, updatePassword }}>
+    <AuthContext.Provider value={{
+      user,
+      session,
+      loading,
+      signUp,
+      signIn,
+      signOut,
+      resetPassword,
+      updatePassword,
+      subscriptionStatus,
+      checkSubscription
+    }}>
       {children}
     </AuthContext.Provider>
   );
