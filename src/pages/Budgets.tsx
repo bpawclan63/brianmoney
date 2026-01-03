@@ -10,16 +10,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Budget } from '@/types';
+import { toast } from 'sonner';
 
 export default function Budgets() {
   const { t } = useLanguage();
-  const { budgets, loading: loadingBudgets, addBudget } = useDbBudgets();
+  const { budgets, loading: loadingBudgets, addBudget, updateBudget, deleteBudget } = useDbBudgets();
   const { transactions, loading: loadingTx } = useDbTransactions();
   const { categories, loading: loadingCat } = useDbCategories();
   const { profile } = useDbProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [budgetAmount, setBudgetAmount] = useState('');
+  const [editAmount, setEditAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const currency = profile?.currency || 'IDR';
@@ -87,6 +92,30 @@ export default function Budgets() {
     setBudgetAmount('');
     setIsDialogOpen(false);
     setSubmitting(false);
+  };
+
+  const handleEditBudget = (budget: Budget) => {
+    setEditingBudget(budget);
+    setEditAmount(budget.amount.toString());
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateBudget = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBudget || !editAmount || parseFloat(editAmount) <= 0) return;
+
+    setSubmitting(true);
+    await updateBudget(editingBudget.id, { amount: parseFloat(editAmount) });
+    toast.success(t('common', 'save') + '!');
+    setEditingBudget(null);
+    setEditAmount('');
+    setIsEditDialogOpen(false);
+    setSubmitting(false);
+  };
+
+  const handleDeleteBudget = async (budgetId: string) => {
+    await deleteBudget(budgetId);
+    toast.success(t('common', 'delete') + '!');
   };
 
   if (loading) {
@@ -173,6 +202,8 @@ export default function Budgets() {
               budget={budget}
               category={transformedCategories.find((c) => c.id === budget.categoryId)}
               currency={currency}
+              onEdit={handleEditBudget}
+              onDelete={handleDeleteBudget}
             />
           ))}
         </div>
@@ -234,6 +265,58 @@ export default function Budgets() {
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 <Plus className="w-4 h-4" />
                 {t('budgets', 'addBudget')}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Budget Dialog */}
+      {isEditDialogOpen && editingBudget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setIsEditDialogOpen(false)}
+          />
+          <div className="relative w-full max-w-md mx-4 glass-card p-6 animate-scale-in">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-foreground">{t('common', 'edit')} Budget</h2>
+              <Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(false)}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <form onSubmit={handleUpdateBudget} className="space-y-5">
+              <div>
+                <Label className="text-muted-foreground">{t('common', 'category')}</Label>
+                <div className="p-3 rounded-lg bg-muted/30 mt-1.5 flex items-center gap-2">
+                  <CategoryIcon 
+                    iconName={transformedCategories.find(c => c.id === editingBudget.categoryId)?.icon} 
+                    className="w-5 h-5 flex-shrink-0" 
+                  />
+                  <span className="text-sm">
+                    {transformedCategories.find(c => c.id === editingBudget.categoryId)?.name || 'Unknown'}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">{t('budgets', 'budgetAmount')}</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={editAmount}
+                  onChange={(e) => setEditAmount(e.target.value)}
+                  min="0"
+                  step="1"
+                  className="mt-1.5 text-lg font-semibold"
+                  required
+                />
+              </div>
+
+              <Button type="submit" className="w-full" variant="neon" disabled={submitting}>
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {t('common', 'save')}
               </Button>
             </form>
           </div>
