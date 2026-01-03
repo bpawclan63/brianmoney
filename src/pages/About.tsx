@@ -1,43 +1,45 @@
 import { Sparkles, BarChart3, CheckSquare, PiggyBank, Heart, Shield, Zap, Instagram, MessageCircle, BookOpen, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-
-const features = [
-  {
-    icon: Sparkles,
-    title: 'Transaction Tracking',
-    description: 'Track all your income and expenses with detailed categorization and payment methods.',
-    color: 'from-neon-pink to-neon-purple',
-  },
-  {
-    icon: PiggyBank,
-    title: 'Smart Budgeting',
-    description: 'Set monthly budgets for each category and get alerts when spending approaches limits.',
-    color: 'from-neon-purple to-neon-blue',
-  },
-  {
-    icon: BarChart3,
-    title: 'Visual Analytics',
-    description: 'Beautiful charts and insights to understand your spending patterns and savings rate.',
-    color: 'from-neon-green to-neon-cyan',
-  },
-  {
-    icon: CheckSquare,
-    title: 'Todo Integration',
-    description: 'Built-in task manager to track financial tasks, bills, and reminders.',
-    color: 'from-amber-400 to-orange-400',
-  },
-];
-
-const stats = [
-  { label: 'Categories', value: '13+' },
-  { label: 'Charts', value: '5+' },
-  { label: 'Export Options', value: '2' },
-  { label: 'Payment Methods', value: '3' },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function About() {
+  const { t, language } = useLanguage();
+
+  const features = [
+    {
+      icon: Sparkles,
+      title: t('about', 'transactionTracking'),
+      description: t('about', 'transactionTrackingDesc'),
+      color: 'from-neon-pink to-neon-purple',
+    },
+    {
+      icon: PiggyBank,
+      title: t('about', 'smartBudgeting'),
+      description: t('about', 'smartBudgetingDesc'),
+      color: 'from-neon-purple to-neon-blue',
+    },
+    {
+      icon: BarChart3,
+      title: t('about', 'visualAnalytics'),
+      description: t('about', 'visualAnalyticsDesc'),
+      color: 'from-neon-green to-neon-cyan',
+    },
+    {
+      icon: CheckSquare,
+      title: t('about', 'todoIntegration'),
+      description: t('about', 'todoIntegrationDesc'),
+      color: 'from-amber-400 to-orange-400',
+    },
+  ];
+
+  const stats = [
+    { label: t('about', 'categories'), value: '13+' },
+    { label: t('about', 'charts'), value: '5+' },
+    { label: t('about', 'exportOptions'), value: '2' },
+    { label: t('about', 'paymentMethods'), value: '3' },
+  ];
+
   return (
     <div className="space-y-12 pb-12">
       {/* Hero */}
@@ -56,8 +58,7 @@ export default function About() {
             <span className="text-gradient">Flowly</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Aplikasi keuangan pribadi yang cantik dan mudah digunakan untuk mahasiswa.
-            Kelola pengeluaran, budget, dan capai tujuan finansialmu! ✨
+            {t('about', 'heroDesc')} ✨
           </p>
         </div>
       </div>
@@ -80,7 +81,7 @@ export default function About() {
 
       {/* Features */}
       <div>
-        <h2 className="text-2xl font-bold text-foreground text-center mb-8">Fitur Utama ✨</h2>
+        <h2 className="text-2xl font-bold text-foreground text-center mb-8">{t('about', 'features')} ✨</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {features.map((feature, index) => (
             <div
@@ -107,33 +108,33 @@ export default function About() {
 
       {/* Why Choose */}
       <div className="glass-card p-8">
-        <h2 className="text-2xl font-bold text-foreground text-center mb-8">Kenapa Flowly? 💕</h2>
+        <h2 className="text-2xl font-bold text-foreground text-center mb-8">{t('about', 'whyFlowly')} 💕</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-neon-pink/20 mb-4">
               <Heart className="w-6 h-6 text-neon-pink" />
             </div>
-            <h3 className="font-semibold text-foreground mb-2">Desain Cantik</h3>
+            <h3 className="font-semibold text-foreground mb-2">{t('about', 'beautifulDesign')}</h3>
             <p className="text-sm text-muted-foreground">
-              UI modern dengan animasi halus dan efek glassmorphism yang aesthetic.
+              {t('about', 'beautifulDesignDesc')}
             </p>
           </div>
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-neon-purple/20 mb-4">
               <Shield className="w-6 h-6 text-neon-purple" />
             </div>
-            <h3 className="font-semibold text-foreground mb-2">Privasi Terjaga</h3>
+            <h3 className="font-semibold text-foreground mb-2">{t('about', 'privacySecure')}</h3>
             <p className="text-sm text-muted-foreground">
-              Data keuanganmu aman dan terenkripsi. Tidak ada yang bisa mengakses datamu.
+              {t('about', 'privacySecureDesc')}
             </p>
           </div>
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-neon-green/20 mb-4">
               <Zap className="w-6 h-6 text-neon-green" />
             </div>
-            <h3 className="font-semibold text-foreground mb-2">Cepat & Responsif</h3>
+            <h3 className="font-semibold text-foreground mb-2">{t('about', 'fastResponsive')}</h3>
             <p className="text-sm text-muted-foreground">
-              Performa optimal dengan update instan dan desain responsif.
+              {t('about', 'fastResponsiveDesc')}
             </p>
           </div>
         </div>
@@ -141,15 +142,15 @@ export default function About() {
 
       {/* Quick Links */}
       <div className="glass-card p-8">
-        <h2 className="text-2xl font-bold text-foreground text-center mb-8">Link Cepat 🔗</h2>
+        <h2 className="text-2xl font-bold text-foreground text-center mb-8">{t('about', 'quickLinks')} 🔗</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Link to="/guide" className="glass-card-hover p-4 flex items-center gap-4 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Panduan Penggunaan</h3>
-              <p className="text-sm text-muted-foreground">Pelajari cara menggunakan Flowly</p>
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{t('about', 'userGuide')}</h3>
+              <p className="text-sm text-muted-foreground">{t('about', 'userGuideDesc')}</p>
             </div>
           </Link>
           <Link to="/terms" className="glass-card-hover p-4 flex items-center gap-4 group">
@@ -157,8 +158,8 @@ export default function About() {
               <FileText className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Syarat & Ketentuan</h3>
-              <p className="text-sm text-muted-foreground">Baca syarat penggunaan aplikasi</p>
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{t('about', 'termsConditions')}</h3>
+              <p className="text-sm text-muted-foreground">{t('about', 'termsConditionsDesc')}</p>
             </div>
           </Link>
         </div>
@@ -166,7 +167,7 @@ export default function About() {
 
       {/* Contact & Social */}
       <div className="glass-card p-8">
-        <h2 className="text-2xl font-bold text-foreground text-center mb-8">Hubungi Kami 📱</h2>
+        <h2 className="text-2xl font-bold text-foreground text-center mb-8">{t('about', 'contact')} 📱</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <a 
             href="https://instagram.com/flowly.app" 
@@ -192,7 +193,7 @@ export default function About() {
               <MessageCircle className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Customer Service</h3>
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{t('about', 'customerService')}</h3>
               <p className="text-sm text-muted-foreground">+62 812-3456-7890</p>
             </div>
           </a>
@@ -201,7 +202,7 @@ export default function About() {
 
       {/* Footer */}
       <div className="text-center text-muted-foreground text-sm">
-        <p>Dibuat dengan 💕 menggunakan React, TypeScript & Tailwind CSS</p>
+        <p>{t('about', 'madeWith')} 💕 {t('about', 'using')} React, TypeScript & Tailwind CSS</p>
         <p className="mt-2">Version 1.0.0</p>
       </div>
     </div>

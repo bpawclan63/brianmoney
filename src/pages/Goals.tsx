@@ -9,27 +9,29 @@ import { StatCard } from '@/components/dashboard/StatCard';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { useConfetti } from '@/hooks/useConfetti';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const goalIcons = [
-  { icon: '🎯', name: 'Target' },
-  { icon: '🏠', name: 'Rumah' },
-  { icon: '🚗', name: 'Mobil' },
-  { icon: '✈️', name: 'Liburan' },
-  { icon: '💻', name: 'Laptop' },
-  { icon: '📚', name: 'Pendidikan' },
-  { icon: '💍', name: 'Pernikahan' },
-  { icon: '🏖️', name: 'Pantai' },
-  { icon: '💰', name: 'Tabungan' },
-  { icon: '🎓', name: 'Kuliah' },
-  { icon: '👗', name: 'Fashion' },
-  { icon: '💄', name: 'Kecantikan' },
-  { icon: '☕', name: 'Kopi' },
-  { icon: '🧋', name: 'Boba' },
-  { icon: '💕', name: 'Hadiah' },
+  { icon: '🎯', nameId: 'Target', nameEn: 'Target' },
+  { icon: '🏠', nameId: 'Rumah', nameEn: 'House' },
+  { icon: '🚗', nameId: 'Mobil', nameEn: 'Car' },
+  { icon: '✈️', nameId: 'Liburan', nameEn: 'Vacation' },
+  { icon: '💻', nameId: 'Laptop', nameEn: 'Laptop' },
+  { icon: '📚', nameId: 'Pendidikan', nameEn: 'Education' },
+  { icon: '💍', nameId: 'Pernikahan', nameEn: 'Wedding' },
+  { icon: '🏖️', nameId: 'Pantai', nameEn: 'Beach' },
+  { icon: '💰', nameId: 'Tabungan', nameEn: 'Savings' },
+  { icon: '🎓', nameId: 'Kuliah', nameEn: 'College' },
+  { icon: '👗', nameId: 'Fashion', nameEn: 'Fashion' },
+  { icon: '💄', nameId: 'Kecantikan', nameEn: 'Beauty' },
+  { icon: '☕', nameId: 'Kopi', nameEn: 'Coffee' },
+  { icon: '🧋', nameId: 'Boba', nameEn: 'Boba' },
+  { icon: '💕', nameId: 'Hadiah', nameEn: 'Gift' },
 ];
 const goalColors = ['#f472b6', '#c084fc', '#a78bfa', '#06b6d4', '#10b981', '#f59e0b', '#fb7185'];
 
 export default function Goals() {
+  const { t, language } = useLanguage();
   const { goals, loading, addGoal, updateGoal, deleteGoal } = useDbGoals();
   const { profile } = useDbProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -94,11 +96,10 @@ export default function Goals() {
     });
 
     if (isComplete) {
-      // Fire celebration confetti when goal is achieved!
       fireCelebration();
       toast({
-        title: '🎉 Goal achieved!',
-        description: `Congratulations! You've reached your ${goal.name} goal! 💕`,
+        title: `🎉 ${t('goals', 'goalAchieved')}`,
+        description: `${t('goals', 'congratulations')} ${goal.name}! 💕`,
       });
     }
 
@@ -119,40 +120,40 @@ export default function Goals() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Financial Goals</h1>
-          <p className="text-muted-foreground">Track your savings targets and milestones</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('goals', 'title')}</h1>
+          <p className="text-muted-foreground">{t('goals', 'subtitle')}</p>
         </div>
         <Button variant="neon" onClick={() => setIsDialogOpen(true)}>
           <Plus className="w-4 h-4" />
-          Add Goal
+          {t('goals', 'addGoal')}
         </Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard
-          title="Total Goals"
+          title={t('goals', 'totalGoals')}
           value={stats.total.toString()}
           icon={Target}
           variant="default"
           delay={0}
         />
         <StatCard
-          title="In Progress"
+          title={t('goals', 'inProgress')}
           value={stats.active.toString()}
           icon={TrendingUp}
           variant="budget"
           delay={100}
         />
         <StatCard
-          title="Completed"
+          title={t('goals', 'achieved')}
           value={stats.completed.toString()}
           icon={CheckCircle}
           variant="income"
           delay={200}
         />
         <StatCard
-          title="Total Saved"
+          title={t('goals', 'totalSaved')}
           value={formatCurrency(stats.totalSaved, currency)}
           icon={Target}
           variant="default"
@@ -164,13 +165,13 @@ export default function Goals() {
       {goals.length === 0 ? (
         <div className="glass-card p-12 text-center">
           <Target className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No goals yet</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t('goals', 'noGoals')}</h3>
           <p className="text-muted-foreground mb-6">
-            Set your first financial goal to start saving
+            {t('goals', 'createFirst')}
           </p>
           <Button variant="neon" onClick={() => setIsDialogOpen(true)}>
             <Plus className="w-4 h-4" />
-            Add Goal
+            {t('goals', 'addGoal')}
           </Button>
         </div>
       ) : (
@@ -203,10 +204,10 @@ export default function Goals() {
                       {goal.deadline && (
                         <p className="text-xs text-muted-foreground">
                           {isComplete
-                            ? 'Completed!'
+                            ? t('goals', 'completed')
                             : daysLeft && daysLeft > 0
-                            ? `${daysLeft} days left`
-                            : 'Overdue'}
+                            ? `${daysLeft} ${t('goals', 'daysLeft')}`
+                            : t('goals', 'overdue')}
                         </p>
                       )}
                     </div>
@@ -236,7 +237,7 @@ export default function Goals() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 text-right">
-                    {progress.toFixed(0)}% complete
+                    {progress.toFixed(0)}% {t('goals', 'complete')}
                   </p>
                 </div>
 
@@ -247,14 +248,14 @@ export default function Goals() {
                       <div className="flex gap-2 w-full">
                         <Input
                           type="number"
-                          placeholder="Amount"
+                          placeholder={t('goals', 'amount')}
                           value={fundAmount}
                           onChange={(e) => setFundAmount(e.target.value)}
                           className="flex-1"
                           min="0"
                         />
                         <Button size="sm" variant="neon" onClick={() => handleAddFunds(goal.id)}>
-                          Add
+                          {t('common', 'add')}
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => setIsAddingFunds(null)}>
                           <X className="w-4 h-4" />
@@ -269,7 +270,7 @@ export default function Goals() {
                           onClick={() => setIsAddingFunds(goal.id)}
                         >
                           <Plus className="w-4 h-4" />
-                          Add Funds
+                          {t('goals', 'addFunds')}
                         </Button>
                         <Button
                           size="sm"
@@ -298,7 +299,7 @@ export default function Goals() {
           />
           <div className="relative w-full max-w-md mx-4 glass-card p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-foreground">Tambah Target</h2>
+              <h2 className="text-xl font-semibold text-foreground">{t('goals', 'addGoal')}</h2>
               <Button variant="ghost" size="icon" onClick={() => setIsDialogOpen(false)}>
                 <X className="w-5 h-5" />
               </Button>
@@ -306,9 +307,9 @@ export default function Goals() {
 
             <form onSubmit={handleAddGoal} className="space-y-5">
               <div>
-                <Label className="text-muted-foreground">Nama Target</Label>
+                <Label className="text-muted-foreground">{t('goals', 'goalName')}</Label>
                 <Input
-                  placeholder="contoh: Mobil Baru, Dana Darurat"
+                  placeholder={language === 'id' ? 'contoh: Mobil Baru, Dana Darurat' : 'e.g. New Car, Emergency Fund'}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="mt-1.5"
@@ -317,7 +318,7 @@ export default function Goals() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Jumlah Target</Label>
+                <Label className="text-muted-foreground">{t('goals', 'targetAmount')}</Label>
                 <Input
                   type="number"
                   placeholder="0"
@@ -331,7 +332,7 @@ export default function Goals() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Batas Waktu (Opsional)</Label>
+                <Label className="text-muted-foreground">{t('goals', 'deadlineOptional')}</Label>
                 <Input
                   type="date"
                   value={deadline}
@@ -341,7 +342,7 @@ export default function Goals() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Ikon</Label>
+                <Label className="text-muted-foreground">{t('goals', 'icon')}</Label>
                 <div className="grid grid-cols-5 gap-2 mt-1.5 max-h-32 overflow-y-auto">
                   {goalIcons.map((iconData) => (
                     <button
@@ -354,17 +355,19 @@ export default function Goals() {
                           ? 'bg-primary/20 border-primary/50'
                           : 'bg-muted/30 border-transparent hover:bg-muted/50'
                       )}
-                      title={iconData.name}
+                      title={language === 'id' ? iconData.nameId : iconData.nameEn}
                     >
                       <span className="text-xl">{iconData.icon}</span>
-                      <span className="text-[10px] text-muted-foreground truncate w-full text-center">{iconData.name}</span>
+                      <span className="text-[10px] text-muted-foreground truncate w-full text-center">
+                        {language === 'id' ? iconData.nameId : iconData.nameEn}
+                      </span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Warna</Label>
+                <Label className="text-muted-foreground">{t('goals', 'color')}</Label>
                 <div className="flex gap-2 mt-1.5">
                   {goalColors.map((color) => (
                     <button
@@ -386,7 +389,7 @@ export default function Goals() {
               <Button type="submit" className="w-full" variant="neon" disabled={submitting}>
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 <Plus className="w-4 h-4" />
-                Tambah Target
+                {t('goals', 'addGoal')}
               </Button>
             </form>
           </div>

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
@@ -25,6 +26,7 @@ const passwordSchema = z.object({
 });
 
 export default function Auth() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -179,10 +181,10 @@ export default function Auth() {
   };
 
   const getHeaderText = () => {
-    if (isRecoveryMode) return 'Set your new password.';
-    if (isForgotPassword) return 'Enter your email to reset your password.';
-    if (isLogin) return 'Welcome back! Sign in to continue.';
-    return 'Create your account to get started.';
+    if (isRecoveryMode) return t('auth', 'setNewPassword');
+    if (isForgotPassword) return t('auth', 'resetPasswordDesc');
+    if (isLogin) return t('auth', 'welcomeBack');
+    return t('auth', 'createAccount');
   };
 
   const getThemeIcon = () => {
@@ -236,7 +238,7 @@ export default function Auth() {
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                Sign In
+                {t('auth', 'signIn')}
               </button>
               <button
                 onClick={() => setIsLogin(false)}
@@ -247,22 +249,22 @@ export default function Auth() {
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                Sign Up
+                {t('auth', 'signUp')}
               </button>
             </div>
           )}
 
           {isForgotPassword && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-foreground">Reset Password</h2>
-              <p className="text-sm text-muted-foreground mt-1">We'll send you a link to reset your password.</p>
+              <h2 className="text-xl font-semibold text-foreground">{t('auth', 'resetPassword')}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{t('auth', 'resetPasswordDesc')}</p>
             </div>
           )}
 
           {isRecoveryMode && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-foreground">New Password</h2>
-              <p className="text-sm text-muted-foreground mt-1">Enter your new password below.</p>
+              <h2 className="text-xl font-semibold text-foreground">{t('auth', 'newPassword')}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{t('auth', 'enterNewPassword')}</p>
             </div>
           )}
 
@@ -270,7 +272,7 @@ export default function Auth() {
             {/* Name (signup only) */}
             {!isLogin && !isForgotPassword && !isRecoveryMode && (
               <div>
-                <Label className="text-muted-foreground">Full Name</Label>
+                <Label className="text-muted-foreground">{t('auth', 'name')}</Label>
                 <div className="relative mt-1.5">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -290,7 +292,7 @@ export default function Auth() {
             {/* Email - Not shown in recovery mode */}
             {!isRecoveryMode && (
               <div>
-                <Label className="text-muted-foreground">Email</Label>
+                <Label className="text-muted-foreground">{t('auth', 'email')}</Label>
                 <div className="relative mt-1.5">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -311,7 +313,7 @@ export default function Auth() {
             {(!isForgotPassword || isRecoveryMode) && (
               <div>
                 <Label className="text-muted-foreground">
-                  {isRecoveryMode ? 'New Password' : 'Password'}
+                  {isRecoveryMode ? t('auth', 'newPassword') : t('auth', 'password')}
                 </Label>
                 <div className="relative mt-1.5">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -339,7 +341,7 @@ export default function Auth() {
             {/* Confirm Password - Only for recovery mode */}
             {isRecoveryMode && (
               <div>
-                <Label className="text-muted-foreground">Confirm Password</Label>
+                <Label className="text-muted-foreground">{t('auth', 'confirmPassword')}</Label>
                 <div className="relative mt-1.5">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -364,7 +366,7 @@ export default function Auth() {
                   onClick={() => setIsForgotPassword(true)}
                   className="text-sm text-primary hover:underline"
                 >
-                  Forgot password?
+                  {t('auth', 'forgotPassword')}
                 </button>
               </div>
             )}
@@ -372,12 +374,12 @@ export default function Auth() {
             <Button type="submit" variant="neon" className="w-full" disabled={loading}>
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {isRecoveryMode 
-                ? 'Update Password' 
+                ? t('auth', 'updatePassword') 
                 : isForgotPassword 
-                  ? 'Send Reset Link' 
+                  ? t('auth', 'sendResetLink') 
                   : isLogin 
-                    ? 'Sign In' 
-                    : 'Create Account'}
+                    ? t('auth', 'signIn') 
+                    : t('auth', 'signUp')}
             </Button>
           </form>
         </div>
@@ -391,23 +393,23 @@ export default function Auth() {
               }}
               className="text-primary hover:underline"
             >
-              Back to sign in
+              {t('auth', 'backToLogin')}
             </button>
           ) : isForgotPassword ? (
             <button
               onClick={() => setIsForgotPassword(false)}
               className="text-primary hover:underline"
             >
-              Back to sign in
+              {t('auth', 'backToLogin')}
             </button>
           ) : (
             <>
-              {isLogin ? "Don't have an account? " : 'Already have an account? '}
+              {isLogin ? t('auth', 'noAccount') + ' ' : t('auth', 'haveAccount') + ' '}
               <button
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-primary hover:underline"
               >
-                {isLogin ? 'Sign up' : 'Sign in'}
+                {isLogin ? t('auth', 'signUp') : t('auth', 'signIn')}
               </button>
             </>
           )}
@@ -415,7 +417,7 @@ export default function Auth() {
 
         <p className="text-center text-xs text-muted-foreground mt-4">
           <a href="/admin-login" className="hover:underline opacity-50 hover:opacity-100">
-            Admin access
+            {t('auth', 'adminAccess')}
           </a>
         </p>
       </div>
