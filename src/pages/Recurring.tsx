@@ -10,10 +10,10 @@ import { StatCard } from '@/components/dashboard/StatCard';
 import { cn } from '@/lib/utils';
 
 const intervals = [
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'yearly', label: 'Yearly' },
+  { value: 'daily', label: 'Harian' },
+  { value: 'weekly', label: 'Mingguan' },
+  { value: 'monthly', label: 'Bulanan' },
+  { value: 'yearly', label: 'Tahunan' },
 ] as const;
 
 export default function Recurring() {
@@ -250,7 +250,7 @@ export default function Recurring() {
           />
           <div className="relative w-full max-w-md mx-4 glass-card p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-foreground">Add Recurring</h2>
+              <h2 className="text-xl font-semibold text-foreground">Tambah Transaksi Rutin</h2>
               <Button variant="ghost" size="icon" onClick={() => setIsDialogOpen(false)}>
                 <X className="w-5 h-5" />
               </Button>
@@ -269,7 +269,7 @@ export default function Recurring() {
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
-                  Expense
+                  Pengeluaran
                 </button>
                 <button
                   type="button"
@@ -281,14 +281,14 @@ export default function Recurring() {
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
-                  Income
+                  Pemasukan
                 </button>
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Name</Label>
+                <Label className="text-muted-foreground">Nama</Label>
                 <Input
-                  placeholder="e.g., Monthly Salary, Netflix Subscription"
+                  placeholder="contoh: Gaji Bulanan, Langganan Netflix"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="mt-1.5"
@@ -297,43 +297,44 @@ export default function Recurring() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Amount</Label>
+                <Label className="text-muted-foreground">Jumlah</Label>
                 <Input
                   type="number"
                   placeholder="0"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   min="0"
-                  step="1000"
+                  step="1"
                   className="mt-1.5 text-lg font-semibold"
                   required
                 />
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Category</Label>
-                <div className="grid grid-cols-4 gap-2 mt-1.5">
-                  {filteredCategories.slice(0, 8).map((cat) => (
+                <Label className="text-muted-foreground">Kategori</Label>
+                <div className="grid grid-cols-4 gap-2 mt-1.5 max-h-32 overflow-y-auto">
+                  {filteredCategories.map((cat) => (
                     <button
                       key={cat.id}
                       type="button"
                       onClick={() => setCategoryId(cat.id)}
                       className={cn(
-                        'p-3 rounded-lg text-2xl transition-all border',
+                        'p-2 rounded-lg transition-all border flex flex-col items-center gap-1',
                         categoryId === cat.id
                           ? 'bg-primary/20 border-primary/50'
                           : 'bg-muted/30 border-transparent hover:bg-muted/50'
                       )}
                       title={cat.name}
                     >
-                      <CategoryIcon iconName={cat.icon} className="w-6 h-6" />
+                      <CategoryIcon iconName={cat.icon} className="w-5 h-5" />
+                      <span className="text-[10px] text-muted-foreground truncate w-full text-center">{cat.name}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Interval</Label>
+                <Label className="text-muted-foreground">Interval Waktu</Label>
                 <div className="grid grid-cols-2 gap-2 mt-1.5">
                   {intervals.map((int) => (
                     <button
@@ -354,7 +355,7 @@ export default function Recurring() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Next Date</Label>
+                <Label className="text-muted-foreground">Tanggal Berikutnya</Label>
                 <Input
                   type="date"
                   value={nextDate}
@@ -365,30 +366,34 @@ export default function Recurring() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Payment Method</Label>
+                <Label className="text-muted-foreground">Metode Pembayaran</Label>
                 <div className="flex gap-2 mt-1.5">
-                  {(['cash', 'bank', 'e-wallet'] as const).map((method) => (
+                  {([
+                    { value: 'cash', label: 'Tunai' },
+                    { value: 'bank', label: 'Bank' },
+                    { value: 'e-wallet', label: 'E-Wallet' }
+                  ] as const).map((method) => (
                     <button
-                      key={method}
+                      key={method.value}
                       type="button"
-                      onClick={() => setPaymentMethod(method)}
+                      onClick={() => setPaymentMethod(method.value)}
                       className={cn(
-                        'flex-1 py-2 px-3 text-sm rounded-lg capitalize transition-all border',
-                        paymentMethod === method
+                        'flex-1 py-2 px-3 text-sm rounded-lg transition-all border',
+                        paymentMethod === method.value
                           ? 'bg-primary/20 border-primary/50 text-foreground'
                           : 'bg-muted/30 border-transparent text-muted-foreground hover:text-foreground'
                       )}
                     >
-                      {method}
+                      {method.label}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Note (optional)</Label>
+                <Label className="text-muted-foreground">Catatan (opsional)</Label>
                 <Input
-                  placeholder="Add a note..."
+                  placeholder="Tambahkan catatan..."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   className="mt-1.5"
@@ -398,7 +403,7 @@ export default function Recurring() {
               <Button type="submit" className="w-full" variant="neon" disabled={submitting}>
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 <Plus className="w-4 h-4" />
-                Add Recurring
+                Tambah Rutin
               </Button>
             </form>
           </div>

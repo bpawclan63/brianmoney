@@ -6,12 +6,14 @@ import { AddTodoDialog } from '@/components/todos/AddTodoDialog';
 import { useDbTodos } from '@/hooks/useSupabaseStore';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type FilterStatus = 'all' | 'active' | 'done';
 type SortOption = 'priority' | 'dueDate' | 'created';
 type Priority = 'low' | 'medium' | 'high';
 
 export default function Todos() {
+  const { t } = useLanguage();
   const { todos, loading, addTodo, toggleTodo, deleteTodo } = useDbTodos();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
@@ -90,40 +92,40 @@ export default function Todos() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Todo List</h1>
-          <p className="text-muted-foreground">Manage your tasks and stay organized</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('todos', 'title')}</h1>
+          <p className="text-muted-foreground">{t('todos', 'subtitle')}</p>
         </div>
         <Button variant="neon" onClick={() => setIsDialogOpen(true)}>
           <Plus className="w-4 h-4" />
-          Add Task
+          {t('todos', 'addTask')}
         </Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard
-          title="Total Tasks"
+          title={t('todos', 'totalTasks')}
           value={stats.total.toString()}
           icon={ListTodo}
           variant="default"
           delay={0}
         />
         <StatCard
-          title="Active"
+          title={t('common', 'active')}
           value={stats.active.toString()}
           icon={Clock}
           variant="budget"
           delay={100}
         />
         <StatCard
-          title="Completed"
+          title={t('todos', 'completed')}
           value={stats.completed.toString()}
           icon={CheckCircle2}
           variant="income"
           delay={200}
         />
         <StatCard
-          title="Overdue"
+          title={t('todos', 'overdue')}
           value={stats.overdue.toString()}
           icon={Clock}
           variant="expense"
@@ -146,7 +148,7 @@ export default function Todos() {
                     : 'bg-muted/30 text-muted-foreground hover:text-foreground border border-transparent'
                 )}
               >
-                {status}
+                {status === 'all' ? t('common', 'all') : status === 'active' ? t('common', 'active') : t('common', 'done')}
               </button>
             ))}
           </div>
@@ -156,9 +158,9 @@ export default function Todos() {
             onChange={(e) => setSortBy(e.target.value as SortOption)}
             className="h-10 px-3 rounded-lg bg-muted/50 border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
-            <option value="priority">Sort by Priority</option>
-            <option value="dueDate">Sort by Due Date</option>
-            <option value="created">Sort by Created</option>
+            <option value="priority">{t('todos', 'sortByPriority')}</option>
+            <option value="dueDate">{t('todos', 'sortByDueDate')}</option>
+            <option value="created">{t('todos', 'sortByCreated')}</option>
           </select>
         </div>
       </div>
@@ -168,17 +170,15 @@ export default function Todos() {
         <div className="glass-card p-12 text-center">
           <ListTodo className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">
-            {statusFilter === 'all' ? 'No tasks yet' : `No ${statusFilter} tasks`}
+            {statusFilter === 'all' ? t('todos', 'noTasks') : statusFilter === 'active' ? t('todos', 'noActiveTasks') : t('todos', 'noDoneTasks')}
           </h3>
           <p className="text-muted-foreground mb-6">
-            {statusFilter === 'all'
-              ? 'Create your first task to get started'
-              : `You have no ${statusFilter} tasks`}
+            {statusFilter === 'all' ? t('todos', 'createFirst') : ''}
           </p>
           {statusFilter === 'all' && (
             <Button variant="neon" onClick={() => setIsDialogOpen(true)}>
               <Plus className="w-4 h-4" />
-              Add Task
+              {t('todos', 'addTask')}
             </Button>
           )}
         </div>

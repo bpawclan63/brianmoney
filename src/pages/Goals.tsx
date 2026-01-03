@@ -10,7 +10,23 @@ import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { useConfetti } from '@/hooks/useConfetti';
 
-const goalIcons = ['🎯', '🏠', '🚗', '✈️', '💻', '📚', '💍', '🏖️', '💰', '🎓', '👗', '💄', '☕', '🧋', '💕'];
+const goalIcons = [
+  { icon: '🎯', name: 'Target' },
+  { icon: '🏠', name: 'Rumah' },
+  { icon: '🚗', name: 'Mobil' },
+  { icon: '✈️', name: 'Liburan' },
+  { icon: '💻', name: 'Laptop' },
+  { icon: '📚', name: 'Pendidikan' },
+  { icon: '💍', name: 'Pernikahan' },
+  { icon: '🏖️', name: 'Pantai' },
+  { icon: '💰', name: 'Tabungan' },
+  { icon: '🎓', name: 'Kuliah' },
+  { icon: '👗', name: 'Fashion' },
+  { icon: '💄', name: 'Kecantikan' },
+  { icon: '☕', name: 'Kopi' },
+  { icon: '🧋', name: 'Boba' },
+  { icon: '💕', name: 'Hadiah' },
+];
 const goalColors = ['#f472b6', '#c084fc', '#a78bfa', '#06b6d4', '#10b981', '#f59e0b', '#fb7185'];
 
 export default function Goals() {
@@ -280,9 +296,9 @@ export default function Goals() {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setIsDialogOpen(false)}
           />
-          <div className="relative w-full max-w-md mx-4 glass-card p-6 animate-scale-in">
+          <div className="relative w-full max-w-md mx-4 glass-card p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-foreground">Add Goal</h2>
+              <h2 className="text-xl font-semibold text-foreground">Tambah Target</h2>
               <Button variant="ghost" size="icon" onClick={() => setIsDialogOpen(false)}>
                 <X className="w-5 h-5" />
               </Button>
@@ -290,9 +306,9 @@ export default function Goals() {
 
             <form onSubmit={handleAddGoal} className="space-y-5">
               <div>
-                <Label className="text-muted-foreground">Goal Name</Label>
+                <Label className="text-muted-foreground">Nama Target</Label>
                 <Input
-                  placeholder="e.g., New Car, Emergency Fund"
+                  placeholder="contoh: Mobil Baru, Dana Darurat"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="mt-1.5"
@@ -301,21 +317,21 @@ export default function Goals() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Target Amount</Label>
+                <Label className="text-muted-foreground">Jumlah Target</Label>
                 <Input
                   type="number"
                   placeholder="0"
                   value={targetAmount}
                   onChange={(e) => setTargetAmount(e.target.value)}
                   min="0"
-                  step="100000"
+                  step="1"
                   className="mt-1.5 text-lg font-semibold"
                   required
                 />
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Deadline (Optional)</Label>
+                <Label className="text-muted-foreground">Batas Waktu (Opsional)</Label>
                 <Input
                   type="date"
                   value={deadline}
@@ -325,28 +341,30 @@ export default function Goals() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Icon</Label>
-                <div className="grid grid-cols-5 gap-2 mt-1.5">
-                  {goalIcons.map((icon) => (
+                <Label className="text-muted-foreground">Ikon</Label>
+                <div className="grid grid-cols-5 gap-2 mt-1.5 max-h-32 overflow-y-auto">
+                  {goalIcons.map((iconData) => (
                     <button
-                      key={icon}
+                      key={iconData.icon}
                       type="button"
-                      onClick={() => setSelectedIcon(icon)}
+                      onClick={() => setSelectedIcon(iconData.icon)}
                       className={cn(
-                        'p-3 rounded-lg text-2xl transition-all border',
-                        selectedIcon === icon
+                        'p-2 rounded-lg transition-all border flex flex-col items-center gap-1',
+                        selectedIcon === iconData.icon
                           ? 'bg-primary/20 border-primary/50'
                           : 'bg-muted/30 border-transparent hover:bg-muted/50'
                       )}
+                      title={iconData.name}
                     >
-                      {icon}
+                      <span className="text-xl">{iconData.icon}</span>
+                      <span className="text-[10px] text-muted-foreground truncate w-full text-center">{iconData.name}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Color</Label>
+                <Label className="text-muted-foreground">Warna</Label>
                 <div className="flex gap-2 mt-1.5">
                   {goalColors.map((color) => (
                     <button
@@ -368,7 +386,7 @@ export default function Goals() {
               <Button type="submit" className="w-full" variant="neon" disabled={submitting}>
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 <Plus className="w-4 h-4" />
-                Add Goal
+                Tambah Target
               </Button>
             </form>
           </div>
