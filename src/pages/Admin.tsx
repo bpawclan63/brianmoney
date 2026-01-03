@@ -50,19 +50,12 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsAdmin, useAdminUsers, useUserTransactions, useAdminStats, useAdminActivityLogs } from '@/hooks/useAdmin';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-const actionLabels: Record<string, { label: string; color: string }> = {
-  delete_user: { label: 'Hapus User', color: 'text-red-500' },
-  activate_user: { label: 'Aktifkan User', color: 'text-green-500' },
-  deactivate_user: { label: 'Nonaktifkan User', color: 'text-amber-500' },
-  promote_admin: { label: 'Promosi Admin', color: 'text-purple-500' },
-  demote_admin: { label: 'Hapus Admin', color: 'text-orange-500' },
-  reset_password: { label: 'Reset Password', color: 'text-blue-500' },
-};
-
 export default function Admin() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
   const { users, loading: usersLoading, deleteUser, toggleUserActive, toggleAdminRole, resetPassword } = useAdminUsers();
@@ -79,6 +72,15 @@ export default function Admin() {
   const { transactions, loading: transactionsLoading } = useUserTransactions(
     showTransactions ? selectedUserId : null
   );
+
+  const actionLabels: Record<string, { label: string; color: string }> = {
+    delete_user: { label: t('admin', 'deleteUser'), color: 'text-red-500' },
+    activate_user: { label: t('admin', 'activateUser'), color: 'text-green-500' },
+    deactivate_user: { label: t('admin', 'deactivateUser'), color: 'text-amber-500' },
+    promote_admin: { label: t('admin', 'promoteAdmin'), color: 'text-purple-500' },
+    demote_admin: { label: t('admin', 'demoteAdmin'), color: 'text-orange-500' },
+    reset_password: { label: t('admin', 'resetPassword'), color: 'text-blue-500' },
+  };
 
   if (adminLoading) {
     return (
@@ -130,14 +132,14 @@ export default function Admin() {
   const selectedUser = users.find(u => u.id === selectedUserId);
 
   const statCards = [
-    { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-primary' },
-    { label: 'Active Users', value: stats.activeUsers, icon: Activity, color: 'text-green-500' },
-    { label: 'Admins', value: stats.adminCount, icon: ShieldCheck, color: 'text-purple-500' },
-    { label: 'Total Transactions', value: stats.totalTransactions, icon: Wallet, color: 'text-blue-500' },
-    { label: 'Total Income', value: `Rp ${stats.totalIncome.toLocaleString()}`, icon: TrendingUp, color: 'text-green-500' },
-    { label: 'Total Expense', value: `Rp ${stats.totalExpense.toLocaleString()}`, icon: TrendingDown, color: 'text-red-500' },
-    { label: 'Total Budgets', value: stats.totalBudgets, icon: Wallet, color: 'text-cyan-500' },
-    { label: 'Total Goals', value: stats.totalGoals, icon: Target, color: 'text-amber-500' },
+    { label: t('admin', 'totalUsers'), value: stats.totalUsers, icon: Users, color: 'text-primary' },
+    { label: t('admin', 'activeUsers'), value: stats.activeUsers, icon: Activity, color: 'text-green-500' },
+    { label: t('admin', 'admins'), value: stats.adminCount, icon: ShieldCheck, color: 'text-purple-500' },
+    { label: t('admin', 'totalTransactions'), value: stats.totalTransactions, icon: Wallet, color: 'text-blue-500' },
+    { label: t('admin', 'totalIncome'), value: `Rp ${stats.totalIncome.toLocaleString()}`, icon: TrendingUp, color: 'text-green-500' },
+    { label: t('admin', 'totalExpense'), value: `Rp ${stats.totalExpense.toLocaleString()}`, icon: TrendingDown, color: 'text-red-500' },
+    { label: t('admin', 'totalBudgets'), value: stats.totalBudgets, icon: Wallet, color: 'text-cyan-500' },
+    { label: t('admin', 'totalGoals'), value: stats.totalGoals, icon: Target, color: 'text-amber-500' },
   ];
 
   return (
@@ -155,8 +157,8 @@ export default function Admin() {
               <Shield className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Admin Panel</h1>
-              <p className="text-muted-foreground text-sm">Manage user accounts</p>
+              <h1 className="text-2xl font-bold text-foreground">{t('admin', 'title')}</h1>
+              <p className="text-muted-foreground text-sm">{t('admin', 'manageAccounts')}</p>
             </div>
           </div>
         </div>
@@ -196,7 +198,7 @@ export default function Admin() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                User Accounts
+                {t('admin', 'userAccounts')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -205,39 +207,39 @@ export default function Admin() {
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
               ) : users.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No users found</p>
+                <p className="text-center text-muted-foreground py-8">{t('admin', 'noUsers')}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Joined</TableHead>
-                        <TableHead>Subscription</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t('admin', 'name')}</TableHead>
+                        <TableHead>{t('admin', 'email')}</TableHead>
+                        <TableHead>{t('admin', 'status')}</TableHead>
+                        <TableHead>{t('admin', 'role')}</TableHead>
+                        <TableHead>{t('admin', 'joined')}</TableHead>
+                        <TableHead>{t('admin', 'subscription')}</TableHead>
+                        <TableHead className="text-right">{t('admin', 'actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {users.map((userItem) => (
                         <TableRow key={userItem.id} className={cn(userItem.is_active === false && 'opacity-50')}>
                           <TableCell className="font-medium">
-                            {userItem.name || 'No name'}
+                            {userItem.name || t('admin', 'noName')}
                             {userItem.id === user?.id && (
-                              <span className="ml-2 text-xs text-primary">(You)</span>
+                              <span className="ml-2 text-xs text-primary">({t('admin', 'you')})</span>
                             )}
                           </TableCell>
                           <TableCell>{userItem.email}</TableCell>
                           <TableCell>
                             <Badge variant={userItem.is_active !== false ? 'default' : 'secondary'}>
-                              {userItem.is_active !== false ? 'Active' : 'Inactive'}
+                              {userItem.is_active !== false ? t('admin', 'active') : t('admin', 'inactive')}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge variant={userItem.is_admin ? 'destructive' : 'outline'}>
-                              {userItem.is_admin ? 'Admin' : 'User'}
+                              {userItem.is_admin ? t('admin', 'admins') : t('admin', 'user')}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -249,13 +251,13 @@ export default function Admin() {
                             <div className="text-xs space-y-1">
                               {userItem.is_active !== false ? (
                                 <span className="text-green-500">
-                                  Aktif: {userItem.activated_at 
+                                  {t('admin', 'active')}: {userItem.activated_at 
                                     ? format(new Date(userItem.activated_at), 'dd MMM yyyy')
                                     : format(new Date(userItem.created_at || ''), 'dd MMM yyyy')}
                                 </span>
                               ) : (
                                 <span className="text-red-500">
-                                  Expired: {userItem.deactivated_at 
+                                  {t('admin', 'expired')}: {userItem.deactivated_at 
                                     ? format(new Date(userItem.deactivated_at), 'dd MMM yyyy')
                                     : '-'}
                                 </span>
@@ -268,7 +270,7 @@ export default function Admin() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleViewTransactions(userItem.id)}
-                                title="View Transactions"
+                                title={t('admin', 'viewTransactions')}
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
@@ -277,7 +279,7 @@ export default function Admin() {
                                 size="icon"
                                 onClick={() => handleResetPassword(userItem.email, userItem.id)}
                                 disabled={resettingPassword === userItem.id}
-                                title="Reset Password"
+                                title={t('admin', 'resetPassword')}
                               >
                                 {resettingPassword === userItem.id ? (
                                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -292,7 +294,7 @@ export default function Admin() {
                                     size="icon"
                                     onClick={() => handleToggleActive(userItem.id, userItem.is_active, userItem.email)}
                                     disabled={togglingActive === userItem.id}
-                                    title={userItem.is_active !== false ? 'Deactivate User' : 'Activate User'}
+                                    title={userItem.is_active !== false ? t('admin', 'deactivateUser') : t('admin', 'activateUser')}
                                   >
                                     {togglingActive === userItem.id ? (
                                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -307,7 +309,7 @@ export default function Admin() {
                                     size="icon"
                                     onClick={() => handleToggleAdmin(userItem.id, !!userItem.is_admin, userItem.email)}
                                     disabled={togglingAdmin === userItem.id}
-                                    title={userItem.is_admin ? 'Remove Admin' : 'Promote to Admin'}
+                                    title={userItem.is_admin ? t('admin', 'demoteAdmin') : t('admin', 'promoteAdmin')}
                                   >
                                     {togglingAdmin === userItem.id ? (
                                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -325,7 +327,7 @@ export default function Admin() {
                                       setDeleteUserEmail(userItem.email);
                                     }}
                                     className="text-destructive hover:text-destructive"
-                                    title="Delete User"
+                                    title={t('admin', 'deleteUser')}
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </Button>
@@ -347,7 +349,7 @@ export default function Admin() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <History className="w-5 h-5" />
-                Activity Log
+                {t('admin', 'activityLog')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -356,7 +358,7 @@ export default function Admin() {
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
               ) : logs.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No activity yet</p>
+                <p className="text-center text-muted-foreground py-8">{t('admin', 'noActivity')}</p>
               ) : (
                 <ScrollArea className="h-[400px] pr-4">
                   <div className="space-y-3">
@@ -399,10 +401,10 @@ export default function Admin() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Eye className="w-5 h-5" />
-              Transactions - {selectedUser?.name || selectedUser?.email}
+              {t('admin', 'transactions')} - {selectedUser?.name || selectedUser?.email}
             </DialogTitle>
             <DialogDescription>
-              View all transactions for this user
+              {t('admin', 'viewAllTransactions')}
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto">
@@ -412,17 +414,17 @@ export default function Admin() {
               </div>
             ) : transactions.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                No transactions found
+                {t('admin', 'noTransactions')}
               </p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Payment</TableHead>
-                    <TableHead>Note</TableHead>
+                    <TableHead>{t('admin', 'date')}</TableHead>
+                    <TableHead>{t('admin', 'type')}</TableHead>
+                    <TableHead>{t('admin', 'amount')}</TableHead>
+                    <TableHead>{t('admin', 'payment')}</TableHead>
+                    <TableHead>{t('admin', 'note')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -465,19 +467,18 @@ export default function Admin() {
       <AlertDialog open={!!deleteUserId} onOpenChange={() => setDeleteUserId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete User Account?</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin', 'deleteConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the user
-              account and all associated data including transactions, budgets, and todos.
+              {t('admin', 'deleteConfirmDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('admin', 'cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t('admin', 'delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

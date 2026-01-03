@@ -18,6 +18,7 @@ import { useDbTransactions, useDbBudgets, useDbCategories, useDbProfile } from '
 import { formatCurrency } from '@/lib/data';
 import { TrendingUp, TrendingDown, Target, AlertTriangle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const COLORS = [
   'hsl(186 100% 50%)',
@@ -29,6 +30,7 @@ const COLORS = [
 ];
 
 export default function Analytics() {
+  const { t, language } = useLanguage();
   const { transactions, loading: loadingTx } = useDbTransactions();
   const { budgets, loading: loadingBudgets } = useDbBudgets();
   const { categories, loading: loadingCat } = useDbCategories();
@@ -59,12 +61,12 @@ export default function Analytics() {
       .sort(([a], [b]) => a.localeCompare(b))
       .slice(-6)
       .map(([month, data]) => ({
-        month: new Date(month + '-01').toLocaleDateString('id-ID', { month: 'short' }),
+        month: new Date(month + '-01').toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short' }),
         income: data.income,
         expense: data.expense,
         savings: data.income - data.expense,
       }));
-  }, [transactions]);
+  }, [transactions, language]);
 
   // Budget vs Actual
   const budgetVsActual = useMemo(() => {
@@ -164,8 +166,8 @@ export default function Analytics() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
-        <p className="text-muted-foreground">Deep insights into your finances</p>
+        <h1 className="text-2xl font-bold text-foreground">{t('analytics', 'title')}</h1>
+        <p className="text-muted-foreground">{t('analytics', 'subtitle')}</p>
       </div>
 
       {/* Insights Cards */}
@@ -175,13 +177,13 @@ export default function Analytics() {
             <div className={cn('p-2 rounded-lg', insights.savingsRate >= 20 ? 'bg-emerald-500/20' : 'bg-amber-500/20')}>
               <Target className={cn('w-5 h-5', insights.savingsRate >= 20 ? 'text-emerald-400' : 'text-amber-400')} />
             </div>
-            <span className="text-sm text-muted-foreground">Savings Rate</span>
+            <span className="text-sm text-muted-foreground">{t('analytics', 'savingsRate')}</span>
           </div>
           <p className={cn('text-2xl font-bold', insights.savingsRate >= 20 ? 'text-emerald-400' : 'text-amber-400')}>
             {insights.savingsRate.toFixed(1)}%
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {insights.savingsRate >= 20 ? 'Excellent!' : 'Try to save more'}
+            {insights.savingsRate >= 20 ? t('analytics', 'excellent') : t('analytics', 'tryToSaveMore')}
           </p>
         </div>
 
@@ -194,12 +196,12 @@ export default function Analytics() {
                 <TrendingDown className="w-5 h-5 text-red-400" />
               )}
             </div>
-            <span className="text-sm text-muted-foreground">Net Flow</span>
+            <span className="text-sm text-muted-foreground">{t('analytics', 'netFlow')}</span>
           </div>
           <p className={cn('text-2xl font-bold', insights.netFlow >= 0 ? 'text-emerald-400' : 'text-red-400')}>
             {formatCurrency(insights.netFlow, currency)}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">This month</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('analytics', 'thisMonth')}</p>
         </div>
 
         <div className="glass-card p-5">
@@ -207,13 +209,13 @@ export default function Analytics() {
             <div className="p-2 rounded-lg bg-neon-purple/20">
               <span className="text-xl">{insights.topSpendingCategory?.icon || '💸'}</span>
             </div>
-            <span className="text-sm text-muted-foreground">Top Spending</span>
+            <span className="text-sm text-muted-foreground">{t('analytics', 'topSpending')}</span>
           </div>
           <p className="text-lg font-bold text-foreground truncate">
-            {insights.topSpendingCategory?.name || 'N/A'}
+            {insights.topSpendingCategory?.name || t('analytics', 'noData')}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {insights.topSpendingCategory ? formatCurrency(insights.topSpendingCategory.value, currency) : 'No data'}
+            {insights.topSpendingCategory ? formatCurrency(insights.topSpendingCategory.value, currency) : t('analytics', 'noData')}
           </p>
         </div>
 
@@ -222,13 +224,13 @@ export default function Analytics() {
             <div className={cn('p-2 rounded-lg', insights.overBudgetCategories.length > 0 ? 'bg-red-500/20' : 'bg-emerald-500/20')}>
               <AlertTriangle className={cn('w-5 h-5', insights.overBudgetCategories.length > 0 ? 'text-red-400' : 'text-emerald-400')} />
             </div>
-            <span className="text-sm text-muted-foreground">Over Budget</span>
+            <span className="text-sm text-muted-foreground">{t('analytics', 'overBudgetCategories')}</span>
           </div>
           <p className={cn('text-2xl font-bold', insights.overBudgetCategories.length > 0 ? 'text-red-400' : 'text-emerald-400')}>
             {insights.overBudgetCategories.length}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {insights.overBudgetCategories.length > 0 ? 'Categories exceeded' : 'All on track!'}
+            {insights.overBudgetCategories.length > 0 ? t('analytics', 'categoriesExceeded') : t('analytics', 'allOnTrack')}
           </p>
         </div>
       </div>
@@ -237,7 +239,7 @@ export default function Analytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expense Trend */}
         <div className="glass-card p-6">
-          <h3 className="font-semibold text-foreground mb-6">Monthly Trend</h3>
+          <h3 className="font-semibold text-foreground mb-6">{t('analytics', 'monthlyTrend')}</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={monthlyTrend}>
@@ -250,9 +252,9 @@ export default function Analytics() {
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
-                <Line type="monotone" dataKey="income" name="Income" stroke="hsl(142 76% 46%)" strokeWidth={3} dot={{ fill: 'hsl(142 76% 46%)', r: 4 }} />
-                <Line type="monotone" dataKey="expense" name="Expense" stroke="hsl(0 72% 51%)" strokeWidth={3} dot={{ fill: 'hsl(0 72% 51%)', r: 4 }} />
-                <Line type="monotone" dataKey="savings" name="Savings" stroke="hsl(186 100% 50%)" strokeWidth={3} dot={{ fill: 'hsl(186 100% 50%)', r: 4 }} />
+                <Line type="monotone" dataKey="income" name={t('analytics', 'income')} stroke="hsl(142 76% 46%)" strokeWidth={3} dot={{ fill: 'hsl(142 76% 46%)', r: 4 }} />
+                <Line type="monotone" dataKey="expense" name={t('analytics', 'expense')} stroke="hsl(0 72% 51%)" strokeWidth={3} dot={{ fill: 'hsl(0 72% 51%)', r: 4 }} />
+                <Line type="monotone" dataKey="savings" name={t('analytics', 'savings')} stroke="hsl(186 100% 50%)" strokeWidth={3} dot={{ fill: 'hsl(186 100% 50%)', r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -260,11 +262,11 @@ export default function Analytics() {
 
         {/* Budget vs Actual */}
         <div className="glass-card p-6">
-          <h3 className="font-semibold text-foreground mb-6">Budget vs Actual</h3>
+          <h3 className="font-semibold text-foreground mb-6">{t('analytics', 'budgetVsActual')}</h3>
           <div className="h-[300px]">
             {budgetVsActual.length === 0 ? (
               <div className="h-full flex items-center justify-center text-muted-foreground">
-                <p className="text-sm">No budget data available</p>
+                <p className="text-sm">{t('analytics', 'noBudgetData')}</p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -279,8 +281,8 @@ export default function Analytics() {
                   <YAxis dataKey="name" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={100} />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Bar dataKey="budget" name="Budget" fill="hsl(var(--muted-foreground))" radius={[0, 4, 4, 0]} />
-                  <Bar dataKey="actual" name="Actual" fill="hsl(186 100% 50%)" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="budget" name={t('analytics', 'budget')} fill="hsl(var(--muted-foreground))" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="actual" name={t('analytics', 'actual')} fill="hsl(186 100% 50%)" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -290,11 +292,11 @@ export default function Analytics() {
 
       {/* Category Breakdown Pie */}
       <div className="glass-card p-6">
-        <h3 className="font-semibold text-foreground mb-6">Expense Breakdown</h3>
+        <h3 className="font-semibold text-foreground mb-6">{t('analytics', 'expenseBreakdown')}</h3>
         <div className="h-[350px]">
           {categoryBreakdown.length === 0 ? (
             <div className="h-full flex items-center justify-center text-muted-foreground">
-              <p className="text-sm">No expense data this month</p>
+              <p className="text-sm">{t('analytics', 'noExpenseData')}</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
