@@ -18,31 +18,35 @@ import {
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin } from '@/hooks/useAdmin';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
 }
 
-const navItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/budgets', label: 'Budgets', icon: PiggyBank },
-  { path: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
-  { path: '/goals', label: 'Goals', icon: Target },
-  { path: '/recurring', label: 'Recurring', icon: Repeat },
-  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { path: '/todos', label: 'Todo List', icon: CheckSquare },
+type NavKey = 'dashboard' | 'budgets' | 'transactions' | 'goals' | 'recurring' | 'analytics' | 'todos' | 'settings' | 'about';
+
+const navItems: { path: string; labelKey: NavKey; icon: typeof LayoutDashboard }[] = [
+  { path: '/', labelKey: 'dashboard', icon: LayoutDashboard },
+  { path: '/budgets', labelKey: 'budgets', icon: PiggyBank },
+  { path: '/transactions', labelKey: 'transactions', icon: ArrowLeftRight },
+  { path: '/goals', labelKey: 'goals', icon: Target },
+  { path: '/recurring', labelKey: 'recurring', icon: Repeat },
+  { path: '/analytics', labelKey: 'analytics', icon: BarChart3 },
+  { path: '/todos', labelKey: 'todos', icon: CheckSquare },
 ];
 
-const bottomNavItems = [
-  { path: '/settings', label: 'Settings', icon: Settings },
-  { path: '/about', label: 'About', icon: Info },
+const bottomNavItems: { path: string; labelKey: NavKey; icon: typeof Settings }[] = [
+  { path: '/settings', labelKey: 'settings', icon: Settings },
+  { path: '/about', labelKey: 'about', icon: Info },
 ];
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const location = useLocation();
   const { signOut } = useAuth();
   const { isAdmin } = useIsAdmin();
+  const { t } = useLanguage();
 
   return (
     <>
@@ -122,7 +126,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                     isOpen ? 'opacity-100' : 'opacity-0 lg:hidden'
                   )}
                 >
-                  {item.label}
+                  {t('nav', item.labelKey)}
                 </span>
               </NavLink>
             );
@@ -155,7 +159,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                   isOpen ? 'opacity-100' : 'opacity-0 lg:hidden'
                 )}
               >
-                Admin Panel
+                {t('nav', 'adminPanel')}
               </span>
             </NavLink>
           )}
@@ -186,7 +190,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                     isOpen ? 'opacity-100' : 'opacity-0 lg:hidden'
                   )}
                 >
-                  {item.label}
+                  {t('nav', item.labelKey)}
                 </span>
               </NavLink>
             );
@@ -207,7 +211,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 isOpen ? 'opacity-100' : 'opacity-0 lg:hidden'
               )}
             >
-              Sign Out
+              {t('common', 'signOut')}
             </span>
           </button>
         </div>

@@ -7,8 +7,10 @@ import { SpendingChart } from '@/components/dashboard/SpendingChart';
 import { CategoryChart } from '@/components/dashboard/CategoryChart';
 import { useDbTransactions, useDbBudgets, useDbTodos, useDbCategories, useDbProfile } from '@/hooks/useSupabaseStore';
 import { formatCurrency } from '@/lib/data';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Dashboard() {
+  const { t } = useLanguage();
   const { transactions, loading: loadingTransactions } = useDbTransactions();
   const { budgets, loading: loadingBudgets } = useDbBudgets();
   const { todos, toggleTodo, loading: loadingTodos } = useDbTodos();
@@ -109,30 +111,30 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total Balance"
+          title={t('dashboard', 'totalBalance')}
           value={formatCurrency(summary.totalBalance, currency)}
           icon={Wallet}
           variant="default"
           delay={0}
         />
         <StatCard
-          title="Monthly Income"
+          title={t('dashboard', 'monthlyIncome')}
           value={formatCurrency(summary.monthlyIncome, currency)}
           icon={TrendingUp}
           variant="income"
           delay={100}
         />
         <StatCard
-          title="Monthly Expense"
+          title={t('dashboard', 'monthlyExpense')}
           value={formatCurrency(summary.monthlyExpense, currency)}
           icon={TrendingDown}
           variant="expense"
           delay={200}
         />
         <StatCard
-          title="Budget Remaining"
+          title={t('dashboard', 'budgetRemaining')}
           value={formatCurrency(summary.budgetRemaining, currency)}
-          subtitle={`of ${formatCurrency(summary.totalBudget, currency)}`}
+          subtitle={`${t('common', 'of')} ${formatCurrency(summary.totalBudget, currency)}`}
           icon={PiggyBank}
           variant="budget"
           delay={300}

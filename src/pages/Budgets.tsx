@@ -9,8 +9,10 @@ import { StatCard } from '@/components/dashboard/StatCard';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Budgets() {
+  const { t } = useLanguage();
   const { budgets, loading: loadingBudgets, addBudget } = useDbBudgets();
   const { transactions, loading: loadingTx } = useDbTransactions();
   const { categories, loading: loadingCat } = useDbCategories();
@@ -100,7 +102,7 @@ export default function Budgets() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Budgets</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('budgets', 'title')}</h1>
           <p className="text-muted-foreground">
             {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
           </p>
@@ -111,39 +113,39 @@ export default function Budgets() {
           disabled={availableCategories.length === 0}
         >
           <Plus className="w-4 h-4" />
-          Add Budget
+          {t('budgets', 'addBudget')}
         </Button>
       </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <StatCard
-          title="Total Budget"
+          title={t('budgets', 'totalBudget')}
           value={formatCurrency(summary.totalBudget, currency)}
           icon={PiggyBank}
           variant="default"
           delay={0}
         />
         <StatCard
-          title="Total Spent"
+          title={t('budgets', 'totalSpent')}
           value={formatCurrency(summary.totalSpent, currency)}
-          subtitle={`${((summary.totalSpent / summary.totalBudget) * 100 || 0).toFixed(0)}% of budget`}
+          subtitle={`${((summary.totalSpent / summary.totalBudget) * 100 || 0).toFixed(0)}% ${t('budgets', 'ofBudget')}`}
           icon={PiggyBank}
           variant="expense"
           delay={100}
         />
         <StatCard
-          title="On Track"
+          title={t('budgets', 'onTrack')}
           value={summary.onTrack.toString()}
-          subtitle="categories"
+          subtitle={t('common', 'categories')}
           icon={CheckCircle}
           variant="income"
           delay={200}
         />
         <StatCard
-          title="Over Budget"
+          title={t('budgets', 'overBudget')}
           value={summary.overBudget.toString()}
-          subtitle="categories"
+          subtitle={t('common', 'categories')}
           icon={AlertTriangle}
           variant="expense"
           delay={300}
@@ -154,13 +156,13 @@ export default function Budgets() {
       {budgetsWithActualSpent.length === 0 ? (
         <div className="glass-card p-12 text-center">
           <PiggyBank className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No budgets set</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t('budgets', 'noBudgets')}</h3>
           <p className="text-muted-foreground mb-6">
-            Create your first budget to start tracking spending
+            {t('budgets', 'createFirst')}
           </p>
           <Button variant="neon" onClick={() => setIsDialogOpen(true)}>
             <Plus className="w-4 h-4" />
-            Add Budget
+            {t('budgets', 'addBudget')}
           </Button>
         </div>
       ) : (
@@ -185,7 +187,7 @@ export default function Budgets() {
           />
           <div className="relative w-full max-w-md mx-4 glass-card p-6 animate-scale-in">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-foreground">Add Budget</h2>
+              <h2 className="text-xl font-semibold text-foreground">{t('budgets', 'addBudget')}</h2>
               <Button variant="ghost" size="icon" onClick={() => setIsDialogOpen(false)}>
                 <X className="w-5 h-5" />
               </Button>
@@ -193,7 +195,7 @@ export default function Budgets() {
 
             <form onSubmit={handleAddBudget} className="space-y-5">
               <div>
-                <Label className="text-muted-foreground">Category</Label>
+                <Label className="text-muted-foreground">{t('budgets', 'selectCategory')}</Label>
                 <div className="grid grid-cols-2 gap-2 mt-1.5 max-h-48 overflow-y-auto">
                   {availableCategories.map((cat) => (
                     <button
@@ -215,7 +217,7 @@ export default function Budgets() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Budget Amount</Label>
+                <Label className="text-muted-foreground">{t('budgets', 'budgetAmount')}</Label>
                 <Input
                   type="number"
                   placeholder="0"
@@ -231,7 +233,7 @@ export default function Budgets() {
               <Button type="submit" className="w-full" variant="neon" disabled={submitting}>
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 <Plus className="w-4 h-4" />
-                Add Budget
+                {t('budgets', 'addBudget')}
               </Button>
             </form>
           </div>

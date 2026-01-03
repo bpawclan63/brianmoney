@@ -6,8 +6,10 @@ import { AddTransactionDialog } from '@/components/transactions/AddTransactionDi
 import { useDbTransactions, useDbCategories, useDbProfile } from '@/hooks/useSupabaseStore';
 import { formatCurrency } from '@/lib/data';
 import { StatCard } from '@/components/dashboard/StatCard';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Transactions() {
+  const { t } = useLanguage();
   const { transactions, loading: loadingTx, addTransaction, deleteTransaction } = useDbTransactions();
   const { categories, loading: loadingCat } = useDbCategories();
   const { profile } = useDbProfile();
@@ -87,33 +89,33 @@ export default function Transactions() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Transactions</h1>
-          <p className="text-muted-foreground">Track your income and expenses</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('transactions', 'title')}</h1>
+          <p className="text-muted-foreground">{t('transactions', 'subtitle')}</p>
         </div>
         <Button variant="neon" onClick={() => setIsDialogOpen(true)}>
           <Plus className="w-4 h-4" />
-          Add Transaction
+          {t('transactions', 'addTransaction')}
         </Button>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
-          title="This Month Transactions"
+          title={t('transactions', 'thisMonthTransactions')}
           value={summary.total.toString()}
           icon={ArrowLeftRight}
           variant="default"
           delay={0}
         />
         <StatCard
-          title="Total Income"
+          title={t('transactions', 'totalIncome')}
           value={formatCurrency(summary.income, currency)}
           icon={TrendingUp}
           variant="income"
           delay={100}
         />
         <StatCard
-          title="Total Expense"
+          title={t('transactions', 'totalExpense')}
           value={formatCurrency(summary.expense, currency)}
           icon={TrendingDown}
           variant="expense"
