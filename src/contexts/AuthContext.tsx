@@ -22,20 +22,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState<'active' | 'inactive' | 'loading'>('loading');
+  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
 
   const checkSubscription = async () => {
+    if (subscriptionChecked) return;
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        setSubscriptionStatus('inactive');
-        return;
-      }
-
-      console.log('Checking subscription for user:', session.user.id);
+      console.log('Checking subscription for user:', user.id);
       const { data, error } = await supabase
         .from('user_subscriptions')
         .select('status')
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) {
@@ -47,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error('Unexpected error in checkSubscription:', err);
-      setSubscriptionStatus('inactive');
+      // IMPORTANT: Always set to inactive on error to prevent stuck loading
     }
   };
 
@@ -97,6 +93,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    if (subscriptionStatus === 'active') {
+      console.log('Subscription active → stop polling');
+      return;
+    }
+
+    console.log('Starting subscription polling...');
+    const interval = setInterval(() => {
+      checkSubscription();
+    }, 5000);
+
+    return () => {
+      console.log('Stopping subscription polling');
+      clearInterval(interval);
+    };
+  }, [user, subscriptionStatus]);
+
+
+
+
 
   const signUp = async (email: string, password: string, name?: string) => {
     const redirectUrl = `${window.location.origin}/`;

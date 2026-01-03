@@ -12,18 +12,37 @@ export default function SubscriptionGuard({ children }: SubscriptionGuardProps) 
     const { user, loading, subscriptionStatus, signOut } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-
     useEffect(() => {
-        if (!loading && user) {
-            if (subscriptionStatus === 'inactive' && location.pathname !== '/payment') {
+        console.log('SubscriptionGuard useEffect');
+        if (loading) return;
+
+        // belum login
+        if (!user) {
+            if (location.pathname !== '/auth') {
+                navigate('/auth', { replace: true });
+            }
+            return;
+        }
+
+        // user login tapi subscription belum kebaca
+        if (!subscriptionStatus) return;
+
+        // subscription tidak aktif
+        if (subscriptionStatus === 'inactive') {
+            if (location.pathname !== '/payment') {
                 navigate('/payment', { replace: true });
-            } else if (subscriptionStatus === 'active' && location.pathname === '/payment') {
+            }
+            return;
+        }
+
+        // subscription aktif
+        if (subscriptionStatus === 'active') {
+            if (location.pathname === '/payment') {
                 navigate('/', { replace: true });
             }
-        } else if (!loading && !user) {
-            navigate('/auth', { replace: true });
         }
-    }, [user, loading, subscriptionStatus, navigate, location.pathname]);
+    }, [loading, user, subscriptionStatus, location.pathname, navigate]);
+
 
     console.log('SubscriptionGuard rendering:', { loading, user: !!user, subscriptionStatus });
     if (loading || (user && subscriptionStatus === 'loading')) {
