@@ -2,10 +2,12 @@ import { Sparkles, Clock, Mail, Moon, Sun, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function PendingActivation() {
   const { signOut, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useLanguage();
 
   const getThemeIcon = () => {
     switch (theme) {
@@ -40,7 +42,7 @@ export default function PendingActivation() {
           <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-4">
             <Clock className="w-10 h-10 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-bold text-gradient">Menunggu Aktivasi</h1>
+          <h1 className="text-3xl font-bold text-gradient">{t('pendingActivation', 'title')}</h1>
         </div>
 
         {/* Content Card */}
@@ -50,22 +52,22 @@ export default function PendingActivation() {
               <Mail className="w-8 h-8 text-amber-400" />
             </div>
             <h2 className="text-xl font-semibold text-foreground">
-              Akun Anda Sedang Diproses
+              {t('pendingActivation', 'subtitle')}
             </h2>
             <p className="text-muted-foreground">
-              Terima kasih telah mendaftar di Flowly! Akun Anda sedang menunggu aktivasi dari admin.
+              {t('pendingActivation', 'description')}
             </p>
           </div>
 
           <div className="bg-muted/30 rounded-lg p-4 text-left space-y-2">
             <p className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">Email terdaftar:</span>
+              <span className="font-medium text-foreground">{t('pendingActivation', 'registeredEmail')}</span>
             </p>
             <p className="text-sm text-primary">{user?.email}</p>
           </div>
 
           <div className="space-y-2 text-sm text-muted-foreground">
-            <p>Hubungi admin untuk mengaktifkan akun Anda:</p>
+            <p>{t('pendingActivation', 'contactAdmin')}</p>
             <a 
               href="https://wa.me/6281234567890" 
               target="_blank" 
@@ -81,17 +83,17 @@ export default function PendingActivation() {
             className="w-full" 
             onClick={() => signOut()}
           >
-            Keluar
+            {t('common', 'signOut')}
           </Button>
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          Sudah diaktifkan?{' '}
+          {t('pendingActivation', 'alreadyActivated')}{' '}
           <button
             onClick={() => window.location.reload()}
             className="text-primary hover:underline"
           >
-            Refresh halaman
+            {t('pendingActivation', 'refreshPage')}
           </button>
         </p>
       </div>

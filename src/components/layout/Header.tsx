@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { LanguageToggle } from '@/components/ui/language-toggle';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -12,6 +14,7 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, title = 'Dashboard' }: HeaderProps) {
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <header className="h-16 border-b border-border bg-card/30 backdrop-blur-xl sticky top-0 z-30">
@@ -33,10 +36,13 @@ export function Header({ onMenuClick, title = 'Dashboard' }: HeaderProps) {
           <div className="hidden md:flex relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search..."
+              placeholder={t('common', 'search')}
               className="w-64 pl-10 bg-muted/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
             />
           </div>
+
+          {/* Language Toggle */}
+          <LanguageToggle />
 
           {/* Theme Toggle */}
           <ThemeToggle />

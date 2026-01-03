@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getEmojiForCategory, iconToEmoji } from '@/lib/categoryEmojis';
+import { useLanguage } from '@/contexts/LanguageContext';
  
 interface TransactionListProps {
   transactions: Transaction[];
@@ -16,6 +17,7 @@ interface TransactionListProps {
 }
 
 export function TransactionList({ transactions, categories, currency, onDelete }: TransactionListProps) {
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<TransactionType | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -50,7 +52,7 @@ export function TransactionList({ transactions, categories, currency, onDelete }
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search transactions..."
+              placeholder={t('transactions', 'searchTransactions')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -62,16 +64,16 @@ export function TransactionList({ transactions, categories, currency, onDelete }
               onChange={(e) => setTypeFilter(e.target.value as TransactionType | 'all')}
               className="h-10 px-3 rounded-lg bg-muted/50 border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
-              <option value="all">All Types</option>
-              <option value="income">Income</option>
-              <option value="expense">Expense</option>
+              <option value="all">{t('transactions', 'allTypes')}</option>
+              <option value="income">{t('transactions', 'income')}</option>
+              <option value="expense">{t('transactions', 'expense')}</option>
             </select>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="h-10 px-3 rounded-lg bg-muted/50 border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
-              <option value="all">All Categories</option>
+              <option value="all">{t('transactions', 'allCategories')}</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {(iconToEmoji[cat.icon] || '✨')} {cat.name}
@@ -86,7 +88,7 @@ export function TransactionList({ transactions, categories, currency, onDelete }
       {Object.keys(groupedByDate).length === 0 ? (
         <div className="glass-card p-12 text-center">
           <Filter className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
-          <p className="text-muted-foreground">No transactions found</p>
+          <p className="text-muted-foreground">{t('transactions', 'noTransactions')}</p>
         </div>
       ) : (
         <div className="space-y-6">

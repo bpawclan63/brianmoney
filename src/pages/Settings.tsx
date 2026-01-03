@@ -7,6 +7,7 @@ import { useDbProfile, useDbTransactions, useDbCategories } from '@/hooks/useSup
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { z } from 'zod';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const passwordSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
@@ -17,6 +18,7 @@ const passwordSchema = z.object({
 });
 
 export default function Settings() {
+  const { t } = useLanguage();
   const { profile, loading, updateProfile } = useDbProfile();
   const { transactions } = useDbTransactions();
   const { categories } = useDbCategories();
@@ -74,14 +76,14 @@ export default function Settings() {
 
     if (error) {
       toast({
-        title: 'Failed to change password',
+        title: t('toasts', 'error'),
         description: error.message,
         variant: 'destructive',
       });
     } else {
       toast({
-        title: 'Password changed!',
-        description: 'Your password has been successfully updated.',
+        title: t('settings', 'passwordChanged'),
+        description: '',
       });
       setNewPassword('');
       setConfirmPassword('');
@@ -105,8 +107,8 @@ export default function Settings() {
     URL.revokeObjectURL(url);
 
     toast({
-      title: 'Data exported',
-      description: 'Your data has been downloaded as JSON.',
+      title: t('settings', 'dataExported'),
+      description: 'JSON',
     });
   };
 
@@ -127,8 +129,8 @@ export default function Settings() {
     URL.revokeObjectURL(url);
 
     toast({
-      title: 'CSV exported',
-      description: 'Transactions exported as CSV file.',
+      title: t('settings', 'dataExported'),
+      description: 'CSV',
     });
   };
 
@@ -144,8 +146,8 @@ export default function Settings() {
     <div className="space-y-6 max-w-2xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground">Manage your preferences and data</p>
+        <h1 className="text-2xl font-bold text-foreground">{t('settings', 'title')}</h1>
+        <p className="text-muted-foreground">{t('settings', 'subtitle')}</p>
       </div>
 
       {/* Account Info */}
@@ -154,7 +156,7 @@ export default function Settings() {
           <div className="p-2 rounded-lg bg-primary/20">
             <User className="w-5 h-5 text-primary" />
           </div>
-          <h2 className="font-semibold text-foreground">Account</h2>
+          <h2 className="font-semibold text-foreground">{t('settings', 'account')}</h2>
         </div>
 
         <div className="flex items-center gap-4">
@@ -169,7 +171,7 @@ export default function Settings() {
 
         <Button variant="outline" onClick={() => signOut()} className="mt-4">
           <LogOut className="w-4 h-4" />
-          Sign Out
+          {t('common', 'signOut')}
         </Button>
       </div>
 
@@ -179,12 +181,12 @@ export default function Settings() {
           <div className="p-2 rounded-lg bg-primary/20">
             <SettingsIcon className="w-5 h-5 text-primary" />
           </div>
-          <h2 className="font-semibold text-foreground">General Settings</h2>
+          <h2 className="font-semibold text-foreground">{t('settings', 'generalSettings')}</h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <Label className="text-muted-foreground">Currency</Label>
+            <Label className="text-muted-foreground">{t('settings', 'currency')}</Label>
             <select
               value={tempCurrency}
               onChange={(e) => setTempCurrency(e.target.value)}
@@ -200,7 +202,7 @@ export default function Settings() {
           </div>
 
           <div>
-            <Label className="text-muted-foreground">Initial Balance</Label>
+            <Label className="text-muted-foreground">{t('settings', 'initialBalance')}</Label>
             <Input
               type="number"
               value={tempBalance}
@@ -213,7 +215,7 @@ export default function Settings() {
 
         <Button onClick={handleSave} variant="neon" disabled={saving}>
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-          Save Settings
+          {t('settings', 'saveSettings')}
         </Button>
       </div>
 
@@ -223,12 +225,12 @@ export default function Settings() {
           <div className="p-2 rounded-lg bg-neon-cyan/20">
             <Lock className="w-5 h-5 text-neon-cyan" />
           </div>
-          <h2 className="font-semibold text-foreground">Change Password</h2>
+          <h2 className="font-semibold text-foreground">{t('settings', 'changePassword')}</h2>
         </div>
 
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <div>
-            <Label className="text-muted-foreground">New Password</Label>
+            <Label className="text-muted-foreground">{t('settings', 'newPassword')}</Label>
             <div className="relative mt-1.5">
               <Input
                 type={showPassword ? 'text' : 'password'}
@@ -251,7 +253,7 @@ export default function Settings() {
           </div>
 
           <div>
-            <Label className="text-muted-foreground">Confirm New Password</Label>
+            <Label className="text-muted-foreground">{t('settings', 'confirmPassword')}</Label>
             <Input
               type={showPassword ? 'text' : 'password'}
               value={confirmPassword}
@@ -266,7 +268,7 @@ export default function Settings() {
 
           <Button type="submit" variant="outline" disabled={changingPassword}>
             {changingPassword && <Loader2 className="w-4 h-4 animate-spin" />}
-            Change Password
+            {t('settings', 'changePassword')}
           </Button>
         </form>
       </div>
@@ -277,21 +279,21 @@ export default function Settings() {
           <div className="p-2 rounded-lg bg-neon-purple/20">
             <Download className="w-5 h-5 text-neon-purple" />
           </div>
-          <h2 className="font-semibold text-foreground">Export Data</h2>
+          <h2 className="font-semibold text-foreground">{t('settings', 'exportData')}</h2>
         </div>
 
         <p className="text-sm text-muted-foreground">
-          Download your data for backup or to use in other applications.
+          {t('settings', 'exportDescription')}
         </p>
 
         <div className="flex flex-wrap gap-3">
           <Button variant="outline" onClick={exportData}>
             <Download className="w-4 h-4" />
-            Export JSON
+            {t('settings', 'exportJSON')}
           </Button>
           <Button variant="outline" onClick={exportCSV}>
             <Download className="w-4 h-4" />
-            Export CSV
+            {t('settings', 'exportCSV')}
           </Button>
         </div>
       </div>
@@ -302,21 +304,20 @@ export default function Settings() {
           <div className="p-2 rounded-lg bg-success/20">
             <AlertTriangle className="w-5 h-5 text-success" />
           </div>
-          <h2 className="font-semibold text-foreground">Cloud Sync</h2>
+          <h2 className="font-semibold text-foreground">{t('settings', 'cloudSync')}</h2>
         </div>
 
         <p className="text-sm text-muted-foreground">
-          Your data is automatically synced to the cloud and accessible from any device.
-          All your transactions, budgets, goals, and todos are securely stored.
+          {t('settings', 'cloudSyncDescription')}
         </p>
 
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="p-3 rounded-lg bg-muted/30">
-            <p className="text-muted-foreground">Transactions</p>
+            <p className="text-muted-foreground">{t('transactions', 'title')}</p>
             <p className="font-semibold text-foreground">{transactions.length}</p>
           </div>
           <div className="p-3 rounded-lg bg-muted/30">
-            <p className="text-muted-foreground">Categories</p>
+            <p className="text-muted-foreground">{t('common', 'categories')}</p>
             <p className="font-semibold text-foreground">{categories.length}</p>
           </div>
         </div>
