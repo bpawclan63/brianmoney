@@ -15,6 +15,34 @@ export default function Payment() {
     const { user, signOut, checkSubscription } = useAuth();
     const [loading, setLoading] = useState(false);
 
+    const loadSnapScript = (isProduction: boolean): Promise<void> => {
+        return new Promise((resolve) => {
+            const scriptId = 'midtrans-snap-script';
+            const existingScript = document.getElementById(scriptId);
+            const scriptSrc = isProduction
+                ? 'https://app.midtrans.com/snap/snap.js'
+                : 'https://app.sandbox.midtrans.com/snap/snap.js';
+            const clientKey = isProduction
+                ? 'Mid-client-88J3A25b8P192D4' // <--- GANTI DENGAN PRODUCTION CLIENT KEY ANDA
+                : 'SB-Mid-client-4V_t5FcOIPmQm8Ea';
+
+            if (existingScript) {
+                if ((existingScript as HTMLScriptElement).src === scriptSrc) {
+                    resolve();
+                    return;
+                }
+                existingScript.remove();
+            }
+
+            const script = document.createElement('script');
+            script.id = scriptId;
+            script.src = scriptSrc;
+            script.setAttribute('data-client-key', clientKey);
+            script.onload = () => resolve();
+            document.head.appendChild(script);
+        });
+    };
+
     const handlePayment = async () => {
         if (!user) return;
         setLoading(true);
@@ -30,6 +58,11 @@ export default function Payment() {
             });
 
             if (error) throw error;
+
+            console.log('Payment data received:', data);
+
+            // Dynamically load the correct Snap script
+            await loadSnapScript(data.is_production);
 
             if (window.snap) {
                 window.snap.pay(data.token, {

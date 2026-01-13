@@ -53,7 +53,7 @@ serve(async (req) => {
           order_id,
           gross_amount: amount
         },
-        enabled_payments: ['qris'],
+        enabled_payments: ['bank_transfer'],
         customer_details: {
           email: user.email,
         }
@@ -85,7 +85,10 @@ serve(async (req) => {
 
     console.log('Success! Returning token.')
 
-    return new Response(JSON.stringify({ token: data.token }), {
+    return new Response(JSON.stringify({
+      token: data.token,
+      is_production: isProd
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
