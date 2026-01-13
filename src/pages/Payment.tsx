@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Loader2, CreditCard } from 'lucide-react';
+import { Sparkles, Loader2, CreditCard, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -14,6 +14,15 @@ declare global {
 export default function Payment() {
     const { user, signOut, checkSubscription } = useAuth();
     const [loading, setLoading] = useState(false);
+    const [showPayment, setShowPayment] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowPayment(true);
+        }, 10000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     const loadSnapScript = (isProduction: boolean): Promise<void> => {
         return new Promise((resolve) => {
@@ -108,6 +117,37 @@ export default function Payment() {
             setLoading(false);
         }
     };
+
+    if (!showPayment) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+                <Loader2 className="w-10 h-10 animate-spin text-primary mb-6" />
+                <div className="text-center space-y-4 max-w-sm">
+                    <h2 className="text-xl font-semibold">Tunggu sebentar...</h2>
+                    <p className="text-muted-foreground">
+                        Kami sedang memverifikasi status langganan Anda. Jika ini memakan waktu terlalu lama, Anda bisa mencoba masuk kembali.
+                    </p>
+                    <div className="pt-4">
+                        <Button
+                            variant="outline"
+                            onClick={async () => {
+                                try {
+                                    await signOut();
+                                    window.location.reload();
+                                } catch (error) {
+                                    console.error('Logout error:', error);
+                                }
+                            }}
+                            className="w-full flex items-center justify-center gap-2"
+                        >
+                            <LogOut className="w-4 h-4" />
+                            Keluar & Coba Lagi
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4 theme-transition">
