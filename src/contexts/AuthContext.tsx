@@ -26,9 +26,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkSubscription = async () => {
     if (subscriptionChecked) return;
+    if (!user) {
+      setSubscriptionStatus('inactive');
+      return;
+    }
     try {
       console.log('Checking subscription for user:', user.id);
-      const { data, error } = await supabase
+      // Use type assertion since user_subscriptions may not be in generated types
+      const { data, error } = await (supabase as any)
         .from('user_subscriptions')
         .select('status')
         .eq('user_id', user.id)
@@ -43,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error('Unexpected error in checkSubscription:', err);
-      // IMPORTANT: Always set to inactive on error to prevent stuck loading
+      setSubscriptionStatus('inactive');
     }
   };
 

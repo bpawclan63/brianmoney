@@ -1,16 +1,21 @@
 import { Budget, Category } from '@/types';
 import { formatCurrency } from '@/lib/data';
 import { cn } from '@/lib/utils';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Pencil, Trash2 } from 'lucide-react';
 import { getEmojiForCategory, iconToEmoji } from '@/lib/categoryEmojis';
+import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface BudgetCardProps {
   budget: Budget;
   category: Category | undefined;
   currency: string;
+  onEdit?: (budget: Budget) => void;
+  onDelete?: (budgetId: string) => void;
 }
 
-export function BudgetCard({ budget, category, currency }: BudgetCardProps) {
+export function BudgetCard({ budget, category, currency, onEdit, onDelete }: BudgetCardProps) {
+  const { t } = useLanguage();
   const percentage = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
   const remaining = budget.amount - budget.spent;
   const isOverBudget = percentage > 100;
@@ -23,9 +28,9 @@ export function BudgetCard({ budget, category, currency }: BudgetCardProps) {
   };
 
   const getStatusText = () => {
-    if (isOverBudget) return 'Over Budget!';
-    if (isWarning) return 'Almost at limit';
-    return 'On track';
+    if (isOverBudget) return t('budgets', 'overBudget');
+    if (isWarning) return t('budgets', 'almostLimit');
+    return t('budgets', 'onTrack');
   };
 
   const getStatusColor = () => {
@@ -50,11 +55,33 @@ export function BudgetCard({ budget, category, currency }: BudgetCardProps) {
             <p className={cn('text-sm', getStatusColor())}>{getStatusText()}</p>
           </div>
         </div>
-        {isOverBudget && (
-          <div className="p-2 rounded-lg bg-rose-500/20">
-            <AlertTriangle className="w-5 h-5 text-rose-400" />
-          </div>
-        )}
+        <div className="flex items-center gap-1">
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-primary"
+              onClick={() => onEdit(budget)}
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              onClick={() => onDelete(budget.id)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
+          {isOverBudget && (
+            <div className="p-2 rounded-lg bg-rose-500/20 ml-1">
+              <AlertTriangle className="w-5 h-5 text-rose-400" />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Progress bar */}
@@ -66,7 +93,7 @@ export function BudgetCard({ budget, category, currency }: BudgetCardProps) {
           />
         </div>
         <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-          <span>{percentage.toFixed(0)}% used</span>
+          <span>{percentage.toFixed(0)}% {t('budgets', 'used')}</span>
           <span>{formatCurrency(budget.amount, currency)}</span>
         </div>
       </div>
@@ -74,14 +101,14 @@ export function BudgetCard({ budget, category, currency }: BudgetCardProps) {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p className="text-xs text-muted-foreground">Spent</p>
+          <p className="text-xs text-muted-foreground">{t('budgets', 'spent')}</p>
           <p className="text-sm font-semibold text-foreground">
             {formatCurrency(budget.spent, currency)}
           </p>
         </div>
         <div className="text-right">
           <p className="text-xs text-muted-foreground">
-            {remaining >= 0 ? 'Remaining' : 'Over by'}
+            {remaining >= 0 ? t('budgets', 'remaining') : t('budgets', 'overBy')}
           </p>
           <p
             className={cn(

@@ -49,7 +49,7 @@ serve(async (req) => {
 
         const { error: updateError } = await supabaseAdmin
             .from('payment_transactions')
-            .update({ status: transaction_status, updated_at: new NOW() })
+            .update({ status: transaction_status, updated_at: new Date().toISOString() })
             .eq('order_id', order_id)
 
         if (updateError) throw updateError
@@ -73,8 +73,9 @@ serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
         })
-    } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred'
+        return new Response(JSON.stringify({ error: errorMessage }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,
         })
