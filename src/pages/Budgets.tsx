@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, PiggyBank, AlertTriangle, CheckCircle, Loader2, X } from 'lucide-react';
+import { Plus, PiggyBank, AlertTriangle, CheckCircle, Loader2, X, Pencil } from 'lucide-react';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { Button } from '@/components/ui/button';
 import { BudgetCard } from '@/components/budgets/BudgetCard';
@@ -10,14 +10,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from '@/hooks/use-toast';
+import { Budget } from '@/types';
 
 export default function Budgets() {
   const { t } = useLanguage();
-  const { budgets, loading: loadingBudgets, addBudget } = useDbBudgets();
+  const { budgets, loading: loadingBudgets, addBudget, updateBudget, deleteBudget } = useDbBudgets();
   const { transactions, loading: loadingTx } = useDbTransactions();
   const { categories, loading: loadingCat } = useDbCategories();
   const { profile } = useDbProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [budgetAmount, setBudgetAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -69,8 +73,6 @@ export default function Budgets() {
   }, [budgetsWithActualSpent]);
 
   const expenseCategories = transformedCategories.filter((c) => c.type === 'expense' || c.type === 'both');
-  const usedCategoryIds = currentMonthBudgets.map((b) => b.category_id);
-  const availableCategories = expenseCategories.filter((c) => !usedCategoryIds.includes(c.id));
 
   const handleAddBudget = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,10 +85,52 @@ export default function Budgets() {
       month: currentMonth,
     });
 
+    toast({
+      title: t('common', 'success'),
+      description: t('budgets', 'budgetAdded'),
+    });
+
     setSelectedCategory('');
     setBudgetAmount('');
     setIsDialogOpen(false);
     setSubmitting(false);
+  };
+
+  const handleEditBudget = (budget: Budget) => {
+    setEditingBudget(budget);
+    setSelectedCategory(budget.categoryId);
+    setBudgetAmount(budget.amount.toString());
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateBudget = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBudget || !selectedCategory || !budgetAmount || parseFloat(budgetAmount) <= 0) return;
+
+    setSubmitting(true);
+    await updateBudget(editingBudget.id, {
+      category_id: selectedCategory,
+      amount: parseFloat(budgetAmount),
+    });
+
+    toast({
+      title: t('common', 'success'),
+      description: t('budgets', 'budgetUpdated'),
+    });
+
+    setEditingBudget(null);
+    setSelectedCategory('');
+    setBudgetAmount('');
+    setIsEditDialogOpen(false);
+    setSubmitting(false);
+  };
+
+  const handleDeleteBudget = async (budgetId: string) => {
+    await deleteBudget(budgetId);
+    toast({
+      title: t('common', 'success'),
+      description: t('budgets', 'budgetDeleted'),
+    });
   };
 
   if (loading) {
@@ -110,7 +154,6 @@ export default function Budgets() {
         <Button
           variant="neon"
           onClick={() => setIsDialogOpen(true)}
-          disabled={availableCategories.length === 0}
         >
           <Plus className="w-4 h-4" />
           {t('budgets', 'addBudget')}
@@ -173,6 +216,8 @@ export default function Budgets() {
               budget={budget}
               category={transformedCategories.find((c) => c.id === budget.categoryId)}
               currency={currency}
+              onEdit={handleEditBudget}
+              onDelete={handleDeleteBudget}
             />
           ))}
         </div>
@@ -197,7 +242,7 @@ export default function Budgets() {
               <div>
                 <Label className="text-muted-foreground">{t('budgets', 'selectCategory')}</Label>
                 <div className="grid grid-cols-2 gap-2 mt-1.5 max-h-48 overflow-y-auto">
-                  {availableCategories.map((cat) => (
+                  {expenseCategories.map((cat) => (
                     <button
                       key={cat.id}
                       type="button"
@@ -230,10 +275,82 @@ export default function Budgets() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" variant="neon" disabled={submitting}>
+              <Button type="submit" className="w-full" variant="neon" disabled={submitting || !selectedCategory}>
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 <Plus className="w-4 h-4" />
                 {t('budgets', 'addBudget')}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Budget Dialog */}
+      {isEditDialogOpen && editingBudget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setIsEditDialogOpen(false);
+              setEditingBudget(null);
+              setSelectedCategory('');
+              setBudgetAmount('');
+            }}
+          />
+          <div className="relative w-full max-w-md mx-4 glass-card p-6 animate-scale-in">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-foreground">{t('budgets', 'editBudget')}</h2>
+              <Button variant="ghost" size="icon" onClick={() => {
+                setIsEditDialogOpen(false);
+                setEditingBudget(null);
+                setSelectedCategory('');
+                setBudgetAmount('');
+              }}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <form onSubmit={handleUpdateBudget} className="space-y-5">
+              <div>
+                <Label className="text-muted-foreground">{t('budgets', 'selectCategory')}</Label>
+                <div className="grid grid-cols-2 gap-2 mt-1.5 max-h-48 overflow-y-auto">
+                  {expenseCategories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={cn(
+                        'p-3 rounded-lg transition-all border flex items-center gap-2',
+                        selectedCategory === cat.id
+                          ? 'bg-primary/20 border-primary/50'
+                          : 'bg-muted/30 border-transparent hover:bg-muted/50'
+                      )}
+                    >
+                      <CategoryIcon iconName={cat.icon} className="w-5 h-5 flex-shrink-0" />
+                      <span className="text-sm truncate">{cat.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">{t('budgets', 'budgetAmount')}</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={budgetAmount}
+                  onChange={(e) => setBudgetAmount(e.target.value)}
+                  min="0"
+                  step="1"
+                  className="mt-1.5 text-lg font-semibold"
+                  required
+                />
+              </div>
+
+              <Button type="submit" className="w-full" variant="neon" disabled={submitting || !selectedCategory}>
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                <Pencil className="w-4 h-4" />
+                {t('budgets', 'updateBudget')}
               </Button>
             </form>
           </div>

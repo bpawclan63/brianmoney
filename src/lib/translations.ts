@@ -17,6 +17,7 @@ export const translations = {
     noData: { id: 'Tidak ada data', en: 'No data' },
     of: { id: 'dari', en: 'of' },
     categories: { id: 'kategori', en: 'categories' },
+    success: { id: 'Berhasil!', en: 'Success!' },
   },
 
   // Navigation
@@ -78,15 +79,25 @@ export const translations = {
   budgets: {
     title: { id: 'Anggaran', en: 'Budgets' },
     addBudget: { id: 'Tambah Anggaran', en: 'Add Budget' },
+    editBudget: { id: 'Edit Anggaran', en: 'Edit Budget' },
+    updateBudget: { id: 'Perbarui Anggaran', en: 'Update Budget' },
     totalBudget: { id: 'Total Anggaran', en: 'Total Budget' },
     totalSpent: { id: 'Total Terpakai', en: 'Total Spent' },
     onTrack: { id: 'Sesuai Rencana', en: 'On Track' },
+    almostLimit: { id: 'Hampir Batas', en: 'Almost at limit' },
     overBudget: { id: 'Melebihi Anggaran', en: 'Over Budget' },
     noBudgets: { id: 'Belum ada anggaran', en: 'No budgets set' },
     createFirst: { id: 'Buat anggaran pertama untuk mulai melacak pengeluaran', en: 'Create your first budget to start tracking spending' },
     ofBudget: { id: 'dari anggaran', en: 'of budget' },
     selectCategory: { id: 'Pilih Kategori', en: 'Select Category' },
     budgetAmount: { id: 'Jumlah Anggaran', en: 'Budget Amount' },
+    budgetAdded: { id: 'Anggaran berhasil ditambahkan', en: 'Budget added successfully' },
+    budgetUpdated: { id: 'Anggaran berhasil diperbarui', en: 'Budget updated successfully' },
+    budgetDeleted: { id: 'Anggaran berhasil dihapus', en: 'Budget deleted successfully' },
+    used: { id: 'terpakai', en: 'used' },
+    spent: { id: 'Terpakai', en: 'Spent' },
+    remaining: { id: 'Tersisa', en: 'Remaining' },
+    overBy: { id: 'Lebih dari', en: 'Over by' },
   },
 
   // Todos
